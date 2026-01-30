@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../src/components/DashboardLayout';
 import ConfirmModal from '../../../src/components/ConfirmModal';
 import api from '../../../src/lib/api';
+import { useToast } from '../../../src/contexts/ToastContext';
+import { getErrorMessage, logError } from '../../../src/lib/errors';
+import { validateForm, ValidationErrors } from '../../../src/lib/validation';
 import { Search, Plus, Edit, Trash2, X, Sparkles } from 'lucide-react';
 
 interface Category {
@@ -15,6 +18,7 @@ interface Category {
 }
 
 const AdminCategoriesPage: React.FC = () => {
+  const { showSuccess, showError } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,9 +28,8 @@ const AdminCategoriesPage: React.FC = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formErrors, setFormErrors] = useState<ValidationErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const fetchCategories = async () => {
     try {
@@ -36,8 +39,9 @@ const AdminCategoriesPage: React.FC = () => {
       setCategories(categoryData);
       setFilteredCategories(categoryData);
     } catch (error: any) {
-      console.error('Failed to fetch categories:', error);
-      setError('Failed to load categories');
+      logError(error, 'Fetch Categories');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -63,45 +67,63 @@ const AdminCategoriesPage: React.FC = () => {
   }, [searchQuery, categories]);
 
   const handleAddCategory = async () => {
-    if (!formData.name.trim() || !formData.description.trim()) {
-      setError('Name and description are required');
+    // Validate form
+    const errors = validateForm(formData, {
+      name: { required: true, minLength: 2, message: 'Name must be at least 2 characters' },
+      description: { required: true, minLength: 10, message: 'Description must be at least 10 characters' }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      showError(Object.values(errors)[0]);
       return;
     }
 
     try {
       setSubmitting(true);
-      setError('');
+      setFormErrors({});
       await api.post('/categories', formData);
-      setSuccess('Category added successfully!');
+      showSuccess('Category added successfully!');
       setFormData({ name: '', description: '' });
       setIsAddModalOpen(false);
       fetchCategories();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to add category');
+      logError(error, 'Add Category');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleEditCategory = async () => {
-    if (!selectedCategory || !formData.name.trim() || !formData.description.trim()) {
-      setError('Name and description are required');
+    if (!selectedCategory) return;
+
+    // Validate form
+    const errors = validateForm(formData, {
+      name: { required: true, minLength: 2, message: 'Name must be at least 2 characters' },
+      description: { required: true, minLength: 10, message: 'Description must be at least 10 characters' }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      showError(Object.values(errors)[0]);
       return;
     }
 
     try {
       setSubmitting(true);
-      setError('');
+      setFormErrors({});
       await api.put(`/categories/${selectedCategory.id}`, formData);
-      setSuccess('Category updated successfully!');
+      showSuccess('Category updated successfully!');
       setIsEditModalOpen(false);
       setSelectedCategory(null);
       setFormData({ name: '', description: '' });
       fetchCategories();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to update category');
+      logError(error, 'Edit Category');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -113,13 +135,14 @@ const AdminCategoriesPage: React.FC = () => {
     try {
       setSubmitting(true);
       await api.delete(`/categories/${selectedCategory.id}`);
-      setSuccess('Category deleted successfully!');
+      showSuccess('Category deleted successfully!');
       setDeleteConfirmOpen(false);
       setSelectedCategory(null);
       fetchCategories();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to delete category');
+      logError(error, 'Delete Category');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
       setDeleteConfirmOpen(false);
     } finally {
       setSubmitting(false);
@@ -143,7 +166,7 @@ const AdminCategoriesPage: React.FC = () => {
     setIsEditModalOpen(false);
     setSelectedCategory(null);
     setFormData({ name: '', description: '' });
-    setError('');
+    setFormErrors({});
   };
 
   return (
@@ -158,14 +181,6 @@ const AdminCategoriesPage: React.FC = () => {
             Manage subject categories for tutors and students
           </p>
         </div>
-
-        {/* Success Message */}
-        {success && (
-          <div className="mb-6 bg-green-500/20 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="font-medium text-sm">{success}</span>
-          </div>
-        )}
 
         {/* Search and Add Button */}
         <div className="mb-6 flex flex-col md:flex-row gap-4">
@@ -286,13 +301,6 @@ const AdminCategoriesPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
-                {error}
-              </div>
-            )}
-
             {/* Form */}
             <div className="space-y-4">
               <div>
@@ -302,10 +310,20 @@ const AdminCategoriesPage: React.FC = () => {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (formErrors.name) {
+                      setFormErrors({ ...formErrors, name: '' });
+                    }
+                  }}
                   placeholder="e.g., Mathematics"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 focus:border-amber-400"
+                  className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 ${
+                    formErrors.name ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-amber-400'
+                  }`}
                 />
+                {formErrors.name && (
+                  <p className="mt-1 text-xs text-red-400">{formErrors.name}</p>
+                )}
               </div>
 
               <div>
@@ -314,11 +332,21 @@ const AdminCategoriesPage: React.FC = () => {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value });
+                    if (formErrors.description) {
+                      setFormErrors({ ...formErrors, description: '' });
+                    }
+                  }}
                   placeholder="Describe this category..."
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 focus:border-amber-400 resize-none"
+                  className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 resize-none ${
+                    formErrors.description ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-amber-400'
+                  }`}
                 />
+                {formErrors.description && (
+                  <p className="mt-1 text-xs text-red-400">{formErrors.description}</p>
+                )}
               </div>
             </div>
 
@@ -368,13 +396,6 @@ const AdminCategoriesPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
-                {error}
-              </div>
-            )}
-
             {/* Form */}
             <div className="space-y-4">
               <div>
@@ -384,10 +405,20 @@ const AdminCategoriesPage: React.FC = () => {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (formErrors.name) {
+                      setFormErrors({ ...formErrors, name: '' });
+                    }
+                  }}
                   placeholder="e.g., Mathematics"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 focus:border-amber-400"
+                  className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 ${
+                    formErrors.name ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-amber-400'
+                  }`}
                 />
+                {formErrors.name && (
+                  <p className="mt-1 text-xs text-red-400">{formErrors.name}</p>
+                )}
               </div>
 
               <div>
@@ -396,11 +427,21 @@ const AdminCategoriesPage: React.FC = () => {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value });
+                    if (formErrors.description) {
+                      setFormErrors({ ...formErrors, description: '' });
+                    }
+                  }}
                   placeholder="Describe this category..."
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 focus:border-amber-400 resize-none"
+                  className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-slate-100 text-sm placeholder:text-slate-500 outline-none transition-all duration-300 focus:bg-white/8 resize-none ${
+                    formErrors.description ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-amber-400'
+                  }`}
                 />
+                {formErrors.description && (
+                  <p className="mt-1 text-xs text-red-400">{formErrors.description}</p>
+                )}
               </div>
             </div>
 
