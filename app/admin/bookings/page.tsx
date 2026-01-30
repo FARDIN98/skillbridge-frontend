@@ -173,6 +173,19 @@ const AdminBookingsPage: React.FC = () => {
           box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
         }
 
+        .filter-select option {
+          background: #0f172a;
+          color: #cbd5e1;
+          padding: 12px;
+          font-weight: 500;
+        }
+
+        .filter-select option:checked {
+          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+          color: #0f172a;
+          font-weight: 600;
+        }
+
         .bookings-table {
           background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px);
