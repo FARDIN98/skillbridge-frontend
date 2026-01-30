@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../src/components/DashboardLayout';
 import api from '../../../src/lib/api';
+import { useToast } from '../../../src/contexts/ToastContext';
+import { getErrorMessage, logError } from '../../../src/lib/errors';
+import { TableRowSkeleton } from '../../../src/components/Skeleton';
 import { Search, Filter, Calendar, Clock, DollarSign, User, X } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -33,6 +36,7 @@ interface Booking {
 type StatusFilter = 'ALL' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 
 const AdminBookingsPage: React.FC = () => {
+  const { showError } = useToast();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +57,9 @@ const AdminBookingsPage: React.FC = () => {
       setBookings(bookingData);
       setFilteredBookings(bookingData);
     } catch (error: any) {
-      console.error('Failed to fetch bookings:', error);
+      logError(error, 'Fetch Bookings');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -539,14 +545,23 @@ const AdminBookingsPage: React.FC = () => {
 
           {/* Bookings Table */}
           {loading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="loading-shimmer"
-                  style={{ height: '80px' }}
-                />
-              ))}
+            <div className="bookings-table">
+              <div className="table-header">
+                <div>Student</div>
+                <div>Tutor</div>
+                <div>Date & Time</div>
+                <div>Duration</div>
+                <div>Status</div>
+                <div>Price</div>
+                <div>Actions</div>
+              </div>
+              <table className="w-full">
+                <tbody>
+                  {[...Array(5)].map((_, i) => (
+                    <TableRowSkeleton key={i} columns={7} />
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : filteredBookings.length === 0 ? (
             <div

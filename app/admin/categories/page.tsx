@@ -7,6 +7,8 @@ import api from '../../../src/lib/api';
 import { useToast } from '../../../src/contexts/ToastContext';
 import { getErrorMessage, logError } from '../../../src/lib/errors';
 import { validateForm, ValidationErrors } from '../../../src/lib/validation';
+import { CategoryCardSkeleton } from '../../../src/components/Skeleton';
+import { LoadingButton } from '../../../src/components/ButtonSpinner';
 import { Search, Plus, Edit, Trash2, X, Sparkles } from 'lucide-react';
 
 interface Category {
@@ -153,7 +155,7 @@ const AdminCategoriesPage: React.FC = () => {
     setSelectedCategory(category);
     setFormData({ name: category.name, description: category.description });
     setIsEditModalOpen(true);
-    setError('');
+    setFormErrors({});
   };
 
   const openDeleteModal = (category: Category) => {
@@ -208,10 +210,7 @@ const AdminCategoriesPage: React.FC = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="h-40 bg-white/5 rounded-2xl animate-pulse"
-              />
+              <CategoryCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredCategories.length === 0 ? (
@@ -352,19 +351,24 @@ const AdminCategoriesPage: React.FC = () => {
 
             {/* Modal Actions */}
             <div className="flex gap-3 mt-6">
-              <button
+              <LoadingButton
                 onClick={closeModals}
-                className="flex-1 px-6 py-3 rounded-xl font-semibold text-sm bg-white/5 border border-white/10 text-slate-300 transition-all duration-300 hover:bg-white/8 hover:border-white/20"
+                variant="secondary"
+                size="lg"
+                fullWidth
+                disabled={submitting}
               >
                 Cancel
-              </button>
-              <button
+              </LoadingButton>
+              <LoadingButton
                 onClick={handleAddCategory}
-                disabled={submitting}
-                className="flex-1 px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={submitting}
               >
-                {submitting ? 'Adding...' : 'Add Category'}
-              </button>
+                Add Category
+              </LoadingButton>
             </div>
           </div>
         </div>
@@ -447,19 +451,24 @@ const AdminCategoriesPage: React.FC = () => {
 
             {/* Modal Actions */}
             <div className="flex gap-3 mt-6">
-              <button
+              <LoadingButton
                 onClick={closeModals}
-                className="flex-1 px-6 py-3 rounded-xl font-semibold text-sm bg-white/5 border border-white/10 text-slate-300 transition-all duration-300 hover:bg-white/8 hover:border-white/20"
+                variant="secondary"
+                size="lg"
+                fullWidth
+                disabled={submitting}
               >
                 Cancel
-              </button>
-              <button
+              </LoadingButton>
+              <LoadingButton
                 onClick={handleEditCategory}
-                disabled={submitting}
-                className="flex-1 px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={submitting}
               >
-                {submitting ? 'Updating...' : 'Update Category'}
-              </button>
+                Update Category
+              </LoadingButton>
             </div>
           </div>
         </div>

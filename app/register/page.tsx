@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../src/contexts/AuthContext';
 import ErrorMessage from '../../src/components/ErrorMessage';
+import { LoadingButton } from '../../src/components/ButtonSpinner';
 import { BookOpen, GraduationCap, User as UserIcon, Mail, Lock, UserCircle, Sparkles, ArrowRight, Shield } from 'lucide-react';
 
 type UserRole = 'STUDENT' | 'TUTOR';
@@ -512,23 +513,17 @@ const RegisterPage: React.FC = () => {
               </div>
 
               {/* Submit Button */}
-              <button
+              <LoadingButton
                 type="submit"
-                disabled={isSubmitting}
-                className="submit-btn w-full py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                loading={isSubmitting}
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="submit-btn mt-6"
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-slate-800 border-t-transparent rounded-full animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  <>
-                    Create Account
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
+                Create Account
+                {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+              </LoadingButton>
             </form>
 
             {/* Sign In Link */}

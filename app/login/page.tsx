@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../src/contexts/AuthContext';
 import ErrorMessage from '../../src/components/ErrorMessage';
+import { LoadingButton } from '../../src/components/ButtonSpinner';
 import { BookOpen, Mail, Lock, Sparkles, ArrowRight } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
@@ -333,23 +334,17 @@ const LoginPage: React.FC = () => {
               </div>
 
               {/* Submit Button */}
-              <button
+              <LoadingButton
                 type="submit"
-                disabled={isSubmitting}
-                className="submit-btn w-full py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={isSubmitting}
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="submit-btn"
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-slate-800 border-t-transparent rounded-full animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
+                Sign In
+                {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+              </LoadingButton>
             </form>
 
             {/* Demo Credentials */}

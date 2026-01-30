@@ -4,7 +4,10 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../src/components/DashboardLayout';
 import ConfirmModal from '../../../src/components/ConfirmModal';
 import api from '../../../src/lib/api';
-import { Search, Filter, UserCheck, UserX, AlertCircle, CheckCircle } from 'lucide-react';
+import { useToast } from '../../../src/contexts/ToastContext';
+import { getErrorMessage, logError } from '../../../src/lib/errors';
+import { TableRowSkeleton } from '../../../src/components/Skeleton';
+import { Search, Filter, UserCheck, UserX } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface User {
@@ -19,6 +22,7 @@ interface User {
 type RoleFilter = 'ALL' | 'STUDENT' | 'TUTOR' | 'ADMIN';
 
 const AdminUsersPage: React.FC = () => {
+  const { showSuccess, showError } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,8 +31,6 @@ const AdminUsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -43,8 +45,9 @@ const AdminUsersPage: React.FC = () => {
       setUsers(userData);
       setFilteredUsers(userData);
     } catch (error: any) {
-      console.error('Failed to fetch users:', error);
-      setError('Failed to load users. Please try again.');
+      logError(error, 'Fetch Users');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -85,15 +88,13 @@ const AdminUsersPage: React.FC = () => {
     if (!selectedUser) return;
 
     setActionLoading(true);
-    setError(null);
-    setSuccess(null);
 
     try {
       const newStatus = selectedUser.status === 'ACTIVE' ? 'BANNED' : 'ACTIVE';
       await api.patch(`/admin/users/${selectedUser.id}/status`, { status: newStatus });
 
-      setSuccess(
-        `User ${selectedUser.status === 'ACTIVE' ? 'banned' : 'unbanned'} successfully`
+      showSuccess(
+        `User ${selectedUser.status === 'ACTIVE' ? 'banned' : 'unbanned'} successfully!`
       );
 
       // Update local state
@@ -105,10 +106,10 @@ const AdminUsersPage: React.FC = () => {
 
       setShowConfirmModal(false);
       setSelectedUser(null);
-
-      setTimeout(() => setSuccess(null), 5000);
     } catch (error: any) {
-      setError(error.message || 'Failed to update user status');
+      logError(error, 'Update User Status');
+      const errorMessage = getErrorMessage(error);
+      showError(errorMessage);
       setShowConfirmModal(false);
     } finally {
       setActionLoading(false);
@@ -411,20 +412,6 @@ const AdminUsersPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Alerts */}
-          {error && (
-            <div className="alert-message alert-error animate-fade-in-up">
-              <AlertCircle size={16} />
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="alert-message alert-success animate-fade-in-up">
-              <CheckCircle size={16} />
-              {success}
-            </div>
-          )}
 
           {/* Filters */}
           <div
@@ -459,14 +446,23 @@ const AdminUsersPage: React.FC = () => {
 
           {/* Users Table */}
           {loading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="loading-shimmer"
-                  style={{ height: '80px' }}
-                />
-              ))}
+            <div className="users-table">
+              <div className="table-header">
+                <div></div>
+                <div>Name</div>
+                <div>Email</div>
+                <div>Role</div>
+                <div>Status</div>
+                <div>Joined</div>
+                <div>Actions</div>
+              </div>
+              <table className="w-full">
+                <tbody>
+                  {[...Array(5)].map((_, i) => (
+                    <TableRowSkeleton key={i} columns={7} />
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div
