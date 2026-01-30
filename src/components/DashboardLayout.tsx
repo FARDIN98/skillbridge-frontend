@@ -102,6 +102,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         { href: '/tutor/sessions', label: 'Sessions', icon: Calendar },
       ];
     }
+    if (user.role === 'ADMIN') {
+      return [
+        { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/admin/users', label: 'Users', icon: User },
+        { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
+        { href: '/admin/categories', label: 'Categories', icon: Sparkles },
+      ];
+    }
     return [];
   };
 
