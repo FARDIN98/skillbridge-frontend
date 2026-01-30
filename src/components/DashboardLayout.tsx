@@ -12,7 +12,9 @@ import {
   Menu,
   X,
   BookOpen,
-  Sparkles
+  Sparkles,
+  Clock,
+  GraduationCap
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -90,6 +92,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/dashboard/bookings', label: 'My Bookings', icon: Calendar },
         { href: '/dashboard/profile', label: 'Profile', icon: User },
+      ];
+    }
+    if (user.role === 'TUTOR') {
+      return [
+        { href: '/tutor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/tutor/profile', label: 'Profile', icon: GraduationCap },
+        { href: '/tutor/availability', label: 'Availability', icon: Clock },
+        { href: '/tutor/sessions', label: 'Sessions', icon: Calendar },
       ];
     }
     return [];
