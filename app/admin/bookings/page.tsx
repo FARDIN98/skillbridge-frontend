@@ -118,453 +118,52 @@ const AdminBookingsPage: React.FC = () => {
 
   return (
     <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
-
-        .bookings-page {
-          font-family: 'Inter', sans-serif;
-        }
-
-        .page-title {
-          font-family: 'Playfair Display', serif;
-          font-weight: 700;
-          color: #f1f5f9;
-        }
-
-        .search-bar {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          padding: 12px 16px;
-          transition: all 0.3s ease;
-        }
-
-        .search-bar:focus-within {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: #fbbf24;
-          box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
-        }
-
-        .search-input {
-          flex: 1;
-          background: transparent;
-          border: none;
-          outline: none;
-          color: #f1f5f9;
-          font-size: 14px;
-        }
-
-        .search-input::placeholder {
-          color: #64748b;
-        }
-
-        .filter-select {
-          padding: 12px 16px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          color: #f1f5f9;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .filter-select:focus {
-          outline: none;
-          background: rgba(255, 255, 255, 0.08);
-          border-color: #fbbf24;
-          box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
-        }
-
-        .filter-select option {
-          background: #0f172a;
-          color: #cbd5e1;
-          padding: 12px;
-          font-weight: 500;
-        }
-
-        .filter-select option:checked {
-          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-          color: #0f172a;
-          font-weight: 600;
-        }
-
-        .bookings-table {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 16px;
-          overflow: hidden;
-        }
-
-        .table-header {
-          display: grid;
-          grid-template-columns: 1.2fr 1.2fr 1fr 100px 120px 100px 140px;
-          gap: 16px;
-          padding: 16px 24px;
-          background: rgba(255, 255, 255, 0.05);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          font-weight: 600;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: #cbd5e1;
-        }
-
-        .table-row {
-          display: grid;
-          grid-template-columns: 1.2fr 1.2fr 1fr 100px 120px 100px 140px;
-          gap: 16px;
-          padding: 20px 24px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          transition: all 0.3s ease;
-          align-items: center;
-          cursor: pointer;
-        }
-
-        .table-row:hover {
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        .table-row:last-child {
-          border-bottom: none;
-        }
-
-        @media (max-width: 1024px) {
-          .bookings-table {
-            background: transparent;
-            border: none;
-          }
-
-          .table-header,
-          .table-row {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-
-          .table-header {
-            display: none;
-          }
-
-          .table-row {
-            padding: 16px;
-            cursor: default;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            margin-bottom: 16px;
-          }
-
-          .table-row:last-child {
-            margin-bottom: 0;
-          }
-
-          .table-row:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(251, 191, 36, 0.3);
-          }
-        }
-
-        .badge {
-          padding: 4px 12px;
-          border-radius: 9999px;
-          font-size: 11px;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          white-space: nowrap;
-          border: 1px solid;
-          display: inline-block;
-        }
-
-        .view-details-btn {
-          padding: 8px 16px;
-          border-radius: 10px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          background: rgba(251, 191, 36, 0.1);
-          border: 1px solid rgba(251, 191, 36, 0.3);
-          color: #fbbf24;
-        }
-
-        .view-details-btn:hover {
-          background: rgba(251, 191, 36, 0.2);
-          transform: translateY(-2px);
-        }
-
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(8px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          padding: 16px;
-          animation: fadeIn 0.2s ease-out;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        .modal-content {
-          background: rgba(15, 23, 42, 0.98);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 16px;
-          padding: 32px;
-          max-width: 600px;
-          width: 100%;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-          animation: slideUp 0.3s ease-out;
-          max-height: 90vh;
-          overflow-y: auto;
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 24px;
-        }
-
-        .modal-title {
-          font-family: 'Playfair Display', serif;
-          font-weight: 700;
-          color: #f1f5f9;
-          font-size: 24px;
-        }
-
-        .close-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #cbd5e1;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .close-btn:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(251, 191, 36, 0.3);
-          color: #fbbf24;
-        }
-
-        .detail-section {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 16px;
-        }
-
-        .detail-section-title {
-          color: #fbbf24;
-          font-weight: 600;
-          font-size: 14px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 12px;
-        }
-
-        .detail-row {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .detail-row:last-child {
-          border-bottom: none;
-          padding-bottom: 0;
-        }
-
-        .detail-label {
-          color: #64748b;
-          font-size: 13px;
-          min-width: 100px;
-        }
-
-        .detail-value {
-          color: #f1f5f9;
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .loading-shimmer {
-          background: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.03) 0%,
-            rgba(255, 255, 255, 0.08) 50%,
-            rgba(255, 255, 255, 0.03) 100%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
-          border-radius: 12px;
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 64px 24px;
-          color: #64748b;
-        }
-
-        .mobile-label {
-          display: none;
-          font-weight: 600;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: #64748b;
-          margin-bottom: 4px;
-        }
-
-        @media (max-width: 1024px) {
-          .mobile-label {
-            display: block;
-          }
-
-          .view-details-btn {
-            width: 100%;
-            justify-content: center;
-            display: flex;
-          }
-        }
-
-        .review-section {
-          background: rgba(251, 191, 36, 0.05);
-          border: 1px solid rgba(251, 191, 36, 0.2);
-          border-radius: 12px;
-          padding: 16px;
-          margin-top: 12px;
-        }
-
-        .star-rating {
-          display: flex;
-          gap: 4px;
-          margin-bottom: 8px;
-        }
-
-        .star-icon {
-          width: 16px;
-          height: 16px;
-        }
-
-        .star-icon.filled {
-          fill: #fbbf24;
-          color: #fbbf24;
-        }
-
-        .star-icon.empty {
-          color: #64748b;
-        }
-      `}</style>
-
       <DashboardLayout allowedRoles={['ADMIN']}>
-        <div className="bookings-page">
+        <div className="font-sans">
           {/* Header */}
-          <div
-            className="mb-6 animate-fade-in-up"
-            style={{ animationDelay: '0.1s', opacity: 0 }}
-          >
-            <h1 className="page-title text-3xl md:text-4xl mb-2">All Bookings</h1>
+          <div className="mb-6 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-3xl md:text-4xl mb-2 font-bold text-slate-100">All Bookings</h1>
             <p className="text-slate-400 text-sm md:text-base">
               View and manage all platform bookings
             </p>
           </div>
 
           {/* Filters */}
-          <div
-            className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up"
-            style={{ animationDelay: '0.2s', opacity: 0 }}
-          >
-            <div className="search-bar">
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 transition-all duration-300 focus-within:bg-white/8 focus-within:border-amber-400 focus-within:ring-3 focus-within:ring-amber-400/10">
               <Search className="h-5 w-5 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search by student or tutor name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
+                className="flex-1 bg-transparent border-none outline-none text-slate-100 text-sm placeholder:text-slate-500"
               />
             </div>
 
-            <div className="flex items-center gap-3">
-              <Filter className="h-5 w-5 text-slate-400 flex-shrink-0" />
+            <div className="relative flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 transition-all duration-300 focus-within:bg-white/8 focus-within:border-amber-400 focus-within:ring-3 focus-within:ring-amber-400/10">
+              <Filter className="h-5 w-5 text-slate-400 flex-shrink-0 pointer-events-none" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                className="filter-select flex-1"
+                className="flex-1 bg-transparent border-none outline-none text-slate-100 text-sm cursor-pointer appearance-none pr-8"
               >
-                <option value="ALL">All Status</option>
-                <option value="PENDING">Pending</option>
-                <option value="CONFIRMED">Confirmed</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
+                <option value="ALL" className="bg-slate-900 text-slate-300">All Status</option>
+                <option value="PENDING" className="bg-slate-900 text-slate-300">Pending</option>
+                <option value="CONFIRMED" className="bg-slate-900 text-slate-300">Confirmed</option>
+                <option value="COMPLETED" className="bg-slate-900 text-slate-300">Completed</option>
+                <option value="CANCELLED" className="bg-slate-900 text-slate-300">Cancelled</option>
               </select>
+              <svg className="absolute right-4 h-4 w-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
           </div>
 
           {/* Bookings Table */}
           {loading ? (
-            <div className="bookings-table">
-              <div className="table-header">
+            <div className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden">
+              <div className="hidden lg:grid grid-cols-[1.2fr_1.2fr_1fr_100px_120px_100px_140px] gap-4 px-6 py-4 bg-white/5 border-b border-white/10 font-semibold text-xs uppercase tracking-wide text-slate-300">
                 <div>Student</div>
                 <div>Tutor</div>
                 <div>Date & Time</div>
@@ -582,179 +181,235 @@ const AdminBookingsPage: React.FC = () => {
               </table>
             </div>
           ) : filteredBookings.length === 0 ? (
-            <div
-              className="empty-state animate-fade-in-up"
-              style={{ animationDelay: '0.3s', opacity: 0 }}
-            >
+            <div className="text-center py-16 px-6 text-slate-500 opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
               <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p className="text-lg font-semibold mb-1">No bookings found</p>
               <p className="text-sm">Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div
-              className="bookings-table animate-fade-in-up"
-              style={{ animationDelay: '0.3s', opacity: 0 }}
-            >
-              <div className="table-header">
-                <div>Student</div>
-                <div>Tutor</div>
-                <div>Date & Time</div>
-                <div>Duration</div>
-                <div>Status</div>
-                <div>Price</div>
-                <div>Actions</div>
+            <div className="opacity-0 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+              {/* Desktop Table Header */}
+              <div className="hidden lg:grid lg:bg-white/3 lg:backdrop-blur-2xl lg:border lg:border-white/10 lg:rounded-2xl lg:overflow-hidden">
+                <div className="grid grid-cols-[1.2fr_1.2fr_1fr_100px_120px_100px_140px] gap-4 px-6 py-4 bg-white/5 border-b border-white/10 font-semibold text-xs uppercase tracking-wide text-slate-300">
+                  <div>Student</div>
+                  <div>Tutor</div>
+                  <div>Date & Time</div>
+                  <div>Duration</div>
+                  <div>Status</div>
+                  <div>Price</div>
+                  <div>Actions</div>
+                </div>
+
+                {/* Desktop Rows */}
+                {filteredBookings.map((booking, index) => (
+                  <div
+                    key={booking.id}
+                    className="grid grid-cols-[1.2fr_1.2fr_1fr_100px_120px_100px_140px] gap-4 px-6 py-5 border-b border-white/5 last:border-b-0 transition-all duration-300 items-center cursor-pointer hover:bg-white/5 opacity-0 animate-fadeInUp"
+                    style={{ animationDelay: `${0.4 + index * 0.05}s` }}
+                  >
+                    <div>
+                      <p className="text-white font-medium text-sm">{booking.student.name}</p>
+                      <p className="text-slate-400 text-xs truncate">{booking.student.email}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-white font-medium text-sm">{booking.tutor.name}</p>
+                      <p className="text-slate-400 text-xs truncate">{booking.tutor.email}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-slate-300 text-sm flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-amber-400" />
+                        {format(new Date(booking.dateTime), 'MMM dd, yyyy')}
+                      </p>
+                      <p className="text-slate-400 text-xs flex items-center gap-2 mt-1">
+                        <Clock className="h-3 w-3 text-amber-400" />
+                        {format(new Date(booking.dateTime), 'hh:mm a')}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-slate-300 text-sm">{booking.duration} min</p>
+                    </div>
+
+                    <div>
+                      <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap border ${getStatusBadgeColor(booking.status)}`}>
+                        {booking.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        {calculatePrice(booking).toFixed(2)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <button
+                        onClick={() => setSelectedBooking(booking)}
+                        className="px-4 py-2 rounded-xl text-[13px] font-semibold cursor-pointer transition-all duration-300 bg-amber-400/10 border border-amber-400/30 text-amber-400 hover:bg-amber-400/20 hover:-translate-y-0.5 flex items-center justify-center"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {filteredBookings.map((booking, index) => (
-                <div
-                  key={booking.id}
-                  className="table-row animate-fade-in-up"
-                  style={{ animationDelay: `${0.4 + index * 0.05}s`, opacity: 0 }}
-                >
-                  <div>
-                    <span className="mobile-label">Student</span>
-                    <p className="text-white font-medium text-sm">{booking.student.name}</p>
-                    <p className="text-slate-400 text-xs">{booking.student.email}</p>
-                  </div>
+              {/* Mobile Cards */}
+              <div className="lg:hidden space-y-4">
+                {filteredBookings.map((booking, index) => (
+                  <div
+                    key={booking.id}
+                    className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 space-y-4 transition-all duration-300 hover:bg-white/5 hover:border-amber-400/30 opacity-0 animate-fadeInUp"
+                    style={{ animationDelay: `${0.4 + index * 0.05}s` }}
+                  >
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Student</span>
+                      <p className="text-white font-medium text-sm">{booking.student.name}</p>
+                      <p className="text-slate-400 text-xs">{booking.student.email}</p>
+                    </div>
 
-                  <div>
-                    <span className="mobile-label">Tutor</span>
-                    <p className="text-white font-medium text-sm">{booking.tutor.name}</p>
-                    <p className="text-slate-400 text-xs">{booking.tutor.email}</p>
-                  </div>
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Tutor</span>
+                      <p className="text-white font-medium text-sm">{booking.tutor.name}</p>
+                      <p className="text-slate-400 text-xs">{booking.tutor.email}</p>
+                    </div>
 
-                  <div>
-                    <span className="mobile-label">Date & Time</span>
-                    <p className="text-slate-300 text-sm flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-amber-400" />
-                      {format(new Date(booking.dateTime), 'MMM dd, yyyy')}
-                    </p>
-                    <p className="text-slate-400 text-xs flex items-center gap-2 mt-1">
-                      <Clock className="h-3 w-3 text-amber-400" />
-                      {format(new Date(booking.dateTime), 'hh:mm a')}
-                    </p>
-                  </div>
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Date & Time</span>
+                      <p className="text-slate-300 text-sm flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-amber-400" />
+                        {format(new Date(booking.dateTime), 'MMM dd, yyyy')}
+                      </p>
+                      <p className="text-slate-400 text-xs flex items-center gap-2 mt-1">
+                        <Clock className="h-3 w-3 text-amber-400" />
+                        {format(new Date(booking.dateTime), 'hh:mm a')}
+                      </p>
+                    </div>
 
-                  <div>
-                    <span className="mobile-label">Duration</span>
-                    <p className="text-slate-300 text-sm">{booking.duration} min</p>
-                  </div>
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Duration</span>
+                      <p className="text-slate-300 text-sm">{booking.duration} min</p>
+                    </div>
 
-                  <div>
-                    <span className="mobile-label">Status</span>
-                    <span className={`badge ${getStatusBadgeColor(booking.status)}`}>
-                      {booking.status}
-                    </span>
-                  </div>
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Status</span>
+                      <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap border ${getStatusBadgeColor(booking.status)}`}>
+                        {booking.status}
+                      </span>
+                    </div>
 
-                  <div>
-                    <span className="mobile-label">Price</span>
-                    <p className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
-                      {calculatePrice(booking).toFixed(2)}
-                    </p>
-                  </div>
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Price</span>
+                      <p className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        {calculatePrice(booking).toFixed(2)}
+                      </p>
+                    </div>
 
-                  <div>
-                    <span className="mobile-label">Actions</span>
-                    <button
-                      onClick={() => setSelectedBooking(booking)}
-                      className="view-details-btn"
-                    >
-                      View Details
-                    </button>
+                    <div>
+                      <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Actions</span>
+                      <button
+                        onClick={() => setSelectedBooking(booking)}
+                        className="w-full px-4 py-2 rounded-xl text-[13px] font-semibold cursor-pointer transition-all duration-300 bg-amber-400/10 border border-amber-400/30 text-amber-400 hover:bg-amber-400/20 hover:-translate-y-0.5 flex items-center justify-center"
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {/* Stats */}
-          <div
-            className="mt-6 text-slate-400 text-sm animate-fade-in-up"
-            style={{ animationDelay: '0.5s', opacity: 0 }}
-          >
+          <div className="mt-6 text-slate-400 text-sm opacity-0 animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
             Showing {filteredBookings.length} of {bookings.length} bookings
           </div>
         </div>
 
         {/* Booking Details Modal */}
         {selectedBooking && (
-          <div className="modal-overlay" onClick={() => setSelectedBooking(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2 className="modal-title">Booking Details</h2>
-                <button onClick={() => setSelectedBooking(null)} className="close-btn">
+          <div className="fixed inset-0 w-screen h-screen bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-fadeIn" onClick={() => setSelectedBooking(null)}>
+            <div className="bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl p-8 max-w-[600px] w-full shadow-[0_20px_60px_rgba(0,0,0,0.5)] animate-slideUp max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-slate-100">Booking Details</h2>
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-300 cursor-pointer transition-all duration-300 flex items-center justify-center hover:bg-white/10 hover:border-amber-400/30 hover:text-amber-400"
+                >
                   <X size={16} />
                 </button>
               </div>
 
               {/* Student Info */}
-              <div className="detail-section">
-                <div className="detail-section-title">Student Information</div>
-                <div className="detail-row">
-                  <span className="detail-label">Name</span>
-                  <span className="detail-value">{selectedBooking.student.name}</span>
+              <div className="bg-white/3 border border-white/10 rounded-xl p-5 mb-4">
+                <div className="text-amber-400 font-semibold text-sm uppercase tracking-wide mb-3">Student Information</div>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Name</span>
+                  <span className="text-slate-100 text-sm font-medium">{selectedBooking.student.name}</span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Email</span>
-                  <span className="detail-value">{selectedBooking.student.email}</span>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Email</span>
+                  <span className="text-slate-100 text-sm font-medium">{selectedBooking.student.email}</span>
                 </div>
               </div>
 
               {/* Tutor Info */}
-              <div className="detail-section">
-                <div className="detail-section-title">Tutor Information</div>
-                <div className="detail-row">
-                  <span className="detail-label">Name</span>
-                  <span className="detail-value">{selectedBooking.tutor.name}</span>
+              <div className="bg-white/3 border border-white/10 rounded-xl p-5 mb-4">
+                <div className="text-amber-400 font-semibold text-sm uppercase tracking-wide mb-3">Tutor Information</div>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Name</span>
+                  <span className="text-slate-100 text-sm font-medium">{selectedBooking.tutor.name}</span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Email</span>
-                  <span className="detail-value">{selectedBooking.tutor.email}</span>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Email</span>
+                  <span className="text-slate-100 text-sm font-medium">{selectedBooking.tutor.email}</span>
                 </div>
                 {selectedBooking.tutor.hourlyRate && (
-                  <div className="detail-row">
-                    <span className="detail-label">Hourly Rate</span>
-                    <span className="detail-value">${selectedBooking.tutor.hourlyRate}/hr</span>
+                  <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                    <span className="text-slate-500 text-[13px] min-w-[100px]">Hourly Rate</span>
+                    <span className="text-slate-100 text-sm font-medium">${selectedBooking.tutor.hourlyRate}/hr</span>
                   </div>
                 )}
               </div>
 
               {/* Booking Info */}
-              <div className="detail-section">
-                <div className="detail-section-title">Session Details</div>
-                <div className="detail-row">
-                  <span className="detail-label">Date</span>
-                  <span className="detail-value">
+              <div className="bg-white/3 border border-white/10 rounded-xl p-5 mb-4">
+                <div className="text-amber-400 font-semibold text-sm uppercase tracking-wide mb-3">Session Details</div>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Date</span>
+                  <span className="text-slate-100 text-sm font-medium">
                     {format(new Date(selectedBooking.dateTime), 'MMMM dd, yyyy')}
                   </span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Time</span>
-                  <span className="detail-value">
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Time</span>
+                  <span className="text-slate-100 text-sm font-medium">
                     {format(new Date(selectedBooking.dateTime), 'hh:mm a')}
                   </span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Duration</span>
-                  <span className="detail-value">{selectedBooking.duration} minutes</span>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Duration</span>
+                  <span className="text-slate-100 text-sm font-medium">{selectedBooking.duration} minutes</span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Status</span>
-                  <span className={`badge ${getStatusBadgeColor(selectedBooking.status)}`}>
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Status</span>
+                  <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap border ${getStatusBadgeColor(selectedBooking.status)}`}>
                     {selectedBooking.status}
                   </span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Total Price</span>
-                  <span className="detail-value text-emerald-400 font-semibold">
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Total Price</span>
+                  <span className="text-emerald-400 font-semibold text-sm">
                     ${calculatePrice(selectedBooking).toFixed(2)}
                   </span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Booked On</span>
-                  <span className="detail-value">
+                <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
+                  <span className="text-slate-500 text-[13px] min-w-[100px]">Booked On</span>
+                  <span className="text-slate-100 text-sm font-medium">
                     {format(new Date(selectedBooking.createdAt), 'MMM dd, yyyy hh:mm a')}
                   </span>
                 </div>
@@ -762,14 +417,14 @@ const AdminBookingsPage: React.FC = () => {
 
               {/* Review Info */}
               {selectedBooking.review && (
-                <div className="detail-section">
-                  <div className="detail-section-title">Student Review</div>
-                  <div className="review-section">
-                    <div className="star-rating">
+                <div className="bg-white/3 border border-white/10 rounded-xl p-5 mb-4">
+                  <div className="text-amber-400 font-semibold text-sm uppercase tracking-wide mb-3">Student Review</div>
+                  <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-4 mt-3">
+                    <div className="flex gap-1 mb-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg
                           key={star}
-                          className={`star-icon ${star <= selectedBooking.review!.rating ? 'filled' : 'empty'}`}
+                          className={`w-4 h-4 ${star <= selectedBooking.review!.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}`}
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
