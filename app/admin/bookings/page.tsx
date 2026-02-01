@@ -234,6 +234,11 @@ const AdminBookingsPage: React.FC = () => {
         }
 
         @media (max-width: 1024px) {
+          .bookings-table {
+            background: transparent;
+            border: none;
+          }
+
           .table-header,
           .table-row {
             grid-template-columns: 1fr;
@@ -247,6 +252,19 @@ const AdminBookingsPage: React.FC = () => {
           .table-row {
             padding: 16px;
             cursor: default;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin-bottom: 16px;
+          }
+
+          .table-row:last-child {
+            margin-bottom: 0;
+          }
+
+          .table-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(251, 191, 36, 0.3);
           }
         }
 

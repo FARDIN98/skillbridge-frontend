@@ -72,18 +72,18 @@ const BookingCard: React.FC<BookingCardProps> = ({
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeClasses = (status: string) => {
     switch (status) {
       case 'CONFIRMED':
-        return 'status-confirmed';
+        return 'bg-green-500/20 text-green-400 border border-green-500/30';
       case 'PENDING':
-        return 'status-pending';
+        return 'bg-amber-400/20 text-amber-400 border border-amber-400/30';
       case 'COMPLETED':
-        return 'status-completed';
+        return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
       case 'CANCELLED':
-        return 'status-cancelled';
+        return 'bg-red-500/20 text-red-400 border border-red-500/30';
       default:
-        return 'status-pending';
+        return 'bg-amber-400/20 text-amber-400 border border-amber-400/30';
     }
   };
 
@@ -100,145 +100,12 @@ const BookingCard: React.FC<BookingCardProps> = ({
     : 0;
 
   return (
-    <>
-      <style jsx>{`
-        .booking-card {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.3s ease;
-        }
-
-        .booking-card:hover {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: rgba(251, 191, 36, 0.3);
-        }
-
-        .tutor-avatar {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 18px;
-          color: #0f172a;
-          border: 2px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .status-badge {
-          padding: 4px 12px;
-          border-radius: 9999px;
-          font-size: 11px;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          white-space: nowrap;
-        }
-
-        .status-confirmed {
-          background: rgba(34, 197, 94, 0.2);
-          color: #4ade80;
-          border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .status-pending {
-          background: rgba(251, 191, 36, 0.2);
-          color: #fbbf24;
-          border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .status-completed {
-          background: rgba(59, 130, 246, 0.2);
-          color: #60a5fa;
-          border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .status-cancelled {
-          background: rgba(239, 68, 68, 0.2);
-          color: #f87171;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .subject-tag {
-          padding: 4px 10px;
-          border-radius: 8px;
-          font-size: 11px;
-          font-weight: 500;
-          background: rgba(251, 191, 36, 0.1);
-          color: #fbbf24;
-          border: 1px solid rgba(251, 191, 36, 0.2);
-        }
-
-        .action-btn {
-          padding: 8px 16px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          border: none;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .cancel-btn {
-          background: rgba(239, 68, 68, 0.1);
-          color: #f87171;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .cancel-btn:hover:not(:disabled) {
-          background: rgba(239, 68, 68, 0.2);
-          transform: translateY(-1px);
-        }
-
-        .cancel-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .review-btn {
-          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-          color: #0f172a;
-        }
-
-        .review-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-        }
-
-        .info-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          color: #cbd5e1;
-          font-size: 13px;
-        }
-
-        .review-display {
-          margin-top: 12px;
-          padding: 12px;
-          border-radius: 12px;
-          background: rgba(251, 191, 36, 0.05);
-          border: 1px solid rgba(251, 191, 36, 0.2);
-        }
-
-        .star-rating {
-          display: flex;
-          gap: 2px;
-        }
-      `}</style>
-
-      <div className="booking-card rounded-xl p-4 md:p-6">
+      <div className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-xl p-4 md:p-6 transition-all duration-300 hover:bg-white/5 hover:border-amber-400/30">
         <div className="flex flex-col gap-4">
           {/* Header: Tutor Info & Status */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="tutor-avatar flex-shrink-0">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center font-bold text-lg text-slate-900 border-2 border-amber-400/30 shrink-0">
                 {booking.tutor.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -248,28 +115,28 @@ const BookingCard: React.FC<BookingCardProps> = ({
                 <p className="text-slate-400 text-xs truncate">{booking.tutor.email}</p>
               </div>
             </div>
-            <span className={`status-badge ${getStatusColor(booking.status)}`}>
+            <span className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap ${getStatusBadgeClasses(booking.status)}`}>
               {booking.status}
             </span>
           </div>
 
           {/* Booking Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="info-item">
-              <Calendar className="h-4 w-4 text-amber-400 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-slate-300 text-sm">
+              <Calendar className="h-4 w-4 text-amber-400 shrink-0" />
               <span>{format(new Date(booking.dateTime), 'MMM dd, yyyy')}</span>
             </div>
-            <div className="info-item">
-              <Clock className="h-4 w-4 text-amber-400 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-slate-300 text-sm">
+              <Clock className="h-4 w-4 text-amber-400 shrink-0" />
               <span>{format(new Date(booking.dateTime), 'hh:mm a')}</span>
             </div>
-            <div className="info-item">
-              <Clock className="h-4 w-4 text-amber-400 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-slate-300 text-sm">
+              <Clock className="h-4 w-4 text-amber-400 shrink-0" />
               <span>{booking.duration} minutes</span>
             </div>
             {totalPrice > 0 && (
-              <div className="info-item">
-                <DollarSign className="h-4 w-4 text-amber-400 flex-shrink-0" />
+              <div className="flex items-center gap-2 text-slate-300 text-sm">
+                <DollarSign className="h-4 w-4 text-amber-400 shrink-0" />
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
             )}
@@ -279,12 +146,12 @@ const BookingCard: React.FC<BookingCardProps> = ({
           {booking.tutor.tutorProfile?.subjects && booking.tutor.tutorProfile.subjects.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {booking.tutor.tutorProfile.subjects.slice(0, 4).map((subject, idx) => (
-                <span key={idx} className="subject-tag">
+                <span key={idx} className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20">
                   {subject}
                 </span>
               ))}
               {booking.tutor.tutorProfile.subjects.length > 4 && (
-                <span className="subject-tag">
+                <span className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20">
                   +{booking.tutor.tutorProfile.subjects.length - 4} more
                 </span>
               )}
@@ -293,9 +160,9 @@ const BookingCard: React.FC<BookingCardProps> = ({
 
           {/* Review Display (if exists) */}
           {booking.review && (
-            <div className="review-display">
+            <div className="mt-3 p-3 rounded-xl bg-amber-400/5 border border-amber-400/20">
               <div className="flex items-center gap-2 mb-2">
-                <div className="star-rating">
+                <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -320,14 +187,17 @@ const BookingCard: React.FC<BookingCardProps> = ({
                 <button
                   onClick={handleCancel}
                   disabled={isCancelling}
-                  className="cancel-btn action-btn"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 border inline-flex items-center gap-2 bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   <X className="h-4 w-4" />
                   {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
                 </button>
               )}
               {canReview && (
-                <button onClick={handleReview} className="review-btn action-btn">
+                <button
+                  onClick={handleReview}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/30 min-h-[44px]"
+                >
                   <Star className="h-4 w-4" />
                   Leave Review
                 </button>
@@ -336,7 +206,6 @@ const BookingCard: React.FC<BookingCardProps> = ({
           )}
         </div>
       </div>
-    </>
   );
 };
 

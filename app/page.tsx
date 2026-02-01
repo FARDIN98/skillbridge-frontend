@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '../src/components/Navbar';
 import Footer from '../src/components/Footer';
 import StarRating from '../src/components/StarRating';
+import { useInView } from '../src/hooks/useInView';
 import api from '../src/lib/api';
 import {
   Search,
@@ -64,6 +65,14 @@ export default function HomePage() {
   const [featuredTutors, setFeaturedTutors] = useState<Tutor[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Scroll animations
+  const featuredTutorsSection = useInView({ threshold: 0.1, triggerOnce: true });
+  const howItWorksSection = useInView({ threshold: 0.1, triggerOnce: true });
+  const categoriesSection = useInView({ threshold: 0.1, triggerOnce: true });
+  const statsSection = useInView({ threshold: 0.2, triggerOnce: true });
+  const testimonialsSection = useInView({ threshold: 0.1, triggerOnce: true });
+  const ctaSection = useInView({ threshold: 0.2, triggerOnce: true });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -175,9 +184,9 @@ export default function HomePage() {
         </section>
 
         {/* Featured Tutors Section */}
-        <section className="py-20 px-4 relative">
+        <section ref={featuredTutorsSection.ref} className="py-20 px-4 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className={`text-center mb-16 transition-all duration-700 ${featuredTutorsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Featured Tutors</h2>
               <p className="text-base sm:text-lg text-slate-400">Learn from the best educators in their fields</p>
             </div>
@@ -193,8 +202,14 @@ export default function HomePage() {
                 {featuredTutors.map((tutor, index) => (
                   <div
                     key={tutor.id}
-                    className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl transition-all duration-300 hover:bg-white/5 hover:border-amber-400/30 p-6 relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-amber-400 before:to-amber-500 before:scale-x-0 before:transition-transform before:duration-300 hover:before:scale-x-100 hover:-translate-y-2 hover:shadow-xl hover:shadow-black/30 opacity-0 animate-[scaleIn_0.6s_ease-out_forwards]"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    className={`bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl transition-all duration-500 hover:bg-white/5 hover:border-amber-400/30 p-6 relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-amber-400 before:to-amber-500 before:scale-x-0 before:transition-transform before:duration-300 hover:before:scale-x-100 hover:-translate-y-2 hover:shadow-xl hover:shadow-black/30 ${
+                      featuredTutorsSection.isInView
+                        ? 'opacity-100 scale-100'
+                        : 'opacity-0 scale-95'
+                    }`}
+                    style={{
+                      transitionDelay: featuredTutorsSection.isInView ? `${index * 100}ms` : '0ms'
+                    }}
                   >
                     <div className="flex items-start gap-4 mb-4">
                       <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 font-bold h-16 w-16 rounded-full flex items-center justify-center text-xl flex-shrink-0">
@@ -253,9 +268,9 @@ export default function HomePage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-20 px-4 relative">
+        <section ref={howItWorksSection.ref} className="py-20 px-4 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className={`text-center mb-16 transition-all duration-700 ${howItWorksSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
               <p className="text-base sm:text-lg text-slate-400">Start learning in three simple steps</p>
             </div>
@@ -283,8 +298,14 @@ export default function HomePage() {
               ].map((step, index) => (
                 <div
                   key={index}
-                  className="text-center opacity-0 animate-[fadeInUp_0.8s_ease-out_forwards]"
-                  style={{ animationDelay: `${index * 0.2}s` }}
+                  className={`text-center transition-all duration-700 ${
+                    howItWorksSection.isInView
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{
+                    transitionDelay: howItWorksSection.isInView ? `${index * 200}ms` : '0ms'
+                  }}
                 >
                   <div className="inline-flex items-center justify-center mb-6 relative">
                     <div className="bg-gradient-to-br from-amber-400/20 to-amber-400/10 border-2 border-amber-400/30 text-amber-400 font-bold backdrop-blur-xl h-20 w-20 rounded-full flex items-center justify-center text-3xl">
@@ -302,9 +323,9 @@ export default function HomePage() {
         </section>
 
         {/* Categories Section */}
-        <section className="py-20 px-4 relative">
+        <section ref={categoriesSection.ref} className="py-20 px-4 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className={`text-center mb-16 transition-all duration-700 ${categoriesSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Popular Categories</h2>
               <p className="text-base sm:text-lg text-slate-400">Explore subjects across all disciplines</p>
             </div>
@@ -323,8 +344,14 @@ export default function HomePage() {
                     <Link
                       key={category.id}
                       href={`/tutors?category=${category.slug}`}
-                      className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 text-center transition-all duration-300 hover:bg-white/5 hover:border-amber-400/30 cursor-pointer relative after:absolute after:inset-0 after:bg-gradient-to-br after:from-amber-400/10 after:to-amber-400/5 after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300 after:rounded-2xl opacity-0 animate-[scaleIn_0.6s_ease-out_forwards]"
-                      style={{ animationDelay: `${index * 0.05}s` }}
+                      className={`bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 text-center transition-all duration-500 hover:bg-white/5 hover:border-amber-400/30 cursor-pointer relative after:absolute after:inset-0 after:bg-gradient-to-br after:from-amber-400/10 after:to-amber-400/5 after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300 after:rounded-2xl ${
+                        categoriesSection.isInView
+                          ? 'opacity-100 scale-100'
+                          : 'opacity-0 scale-95'
+                      }`}
+                      style={{
+                        transitionDelay: categoriesSection.isInView ? `${index * 50}ms` : '0ms'
+                      }}
                     >
                       <Icon className="h-12 w-12 text-amber-400 mx-auto mb-4" />
                       <h3 className="text-white font-semibold text-lg mb-2">{category.name}</h3>
@@ -338,9 +365,11 @@ export default function HomePage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-20 px-4 relative">
+        <section ref={statsSection.ref} className="py-20 px-4 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-3xl transition-all duration-300 hover:bg-white/5 hover:border-amber-400/30 p-12 md:p-16 text-center">
+            <div className={`bg-white/3 backdrop-blur-2xl border border-white/10 rounded-3xl transition-all duration-700 hover:bg-white/5 hover:border-amber-400/30 p-12 md:p-16 text-center ${
+              statsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                 {[
                   { number: '500+', label: 'Expert Tutors', icon: Users },
@@ -350,8 +379,14 @@ export default function HomePage() {
                 ].map((stat, index) => (
                   <div
                     key={index}
-                    className="opacity-0 animate-[fadeInUp_0.8s_ease-out_forwards]"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    className={`transition-all duration-700 ${
+                      statsSection.isInView
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-4'
+                    }`}
+                    style={{
+                      transitionDelay: statsSection.isInView ? `${index * 100}ms` : '0ms'
+                    }}
                   >
                     <stat.icon className="h-8 w-8 text-amber-400 mx-auto mb-3" />
                     <div className="font-black bg-gradient-to-br from-amber-400 to-amber-500 bg-clip-text text-transparent text-4xl md:text-5xl mb-2">
@@ -366,9 +401,9 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-20 px-4 relative">
+        <section ref={testimonialsSection.ref} className="py-20 px-4 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
+            <div className={`text-center mb-16 transition-all duration-700 ${testimonialsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">What Students Say</h2>
               <p className="text-base sm:text-lg text-slate-400">Real feedback from our learning community</p>
             </div>
@@ -396,8 +431,14 @@ export default function HomePage() {
               ].map((testimonial, index) => (
                 <div
                   key={index}
-                  className="bg-white/2 border border-white/8 backdrop-blur-xl rounded-2xl p-8 opacity-0 animate-[fadeInUp_0.8s_ease-out_forwards]"
-                  style={{ animationDelay: `${index * 0.15}s` }}
+                  className={`bg-white/2 border border-white/8 backdrop-blur-xl rounded-2xl p-8 transition-all duration-700 ${
+                    testimonialsSection.isInView
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{
+                    transitionDelay: testimonialsSection.isInView ? `${index * 150}ms` : '0ms'
+                  }}
                 >
                   <Quote className="h-10 w-10 text-amber-400 mb-4 opacity-50" />
                   <p className="text-slate-300 mb-6 text-base leading-relaxed">"{testimonial.text}"</p>
@@ -418,9 +459,11 @@ export default function HomePage() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="py-20 px-4 relative">
+        <section ref={ctaSection.ref} className="py-20 px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-3xl transition-all duration-300 hover:bg-white/5 hover:border-amber-400/30 p-12 md:p-16">
+            <div className={`bg-white/3 backdrop-blur-2xl border border-white/10 rounded-3xl transition-all duration-700 hover:bg-white/5 hover:border-amber-400/30 p-12 md:p-16 ${
+              ctaSection.isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}>
               <Sparkles className="h-16 w-16 text-amber-400 mx-auto mb-6" />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                 Ready to Start Learning?
