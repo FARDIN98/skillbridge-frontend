@@ -3,14 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../src/components/DashboardLayout';
 import api from '../../../src/lib/api';
-import { Calendar, Clock, CheckCircle, BookOpen, Star } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, BookOpen, Star, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '../../../src/contexts/ToastContext';
 
 interface Booking {
   id: string;
   dateTime: string;
   duration: number;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
+  subject?: string;
+  notes?: string;
   createdAt: string;
   student: {
     id: string;
@@ -24,12 +27,17 @@ interface Booking {
   };
 }
 
-type TabType = 'upcoming' | 'past';
+type TabType = 'pending' | 'confirmed' | 'past';
 
 const TutorSessionsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('upcoming');
+  const [activeTab, setActiveTab] = useState<TabType>('pending');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   const fetchBookings = async () => {
     try {
@@ -48,29 +56,83 @@ const TutorSessionsPage: React.FC = () => {
     fetchBookings();
   }, []);
 
+  const handleApprove = async (bookingId: string) => {
+    setIsProcessing(true);
+    try {
+      await api.patch(`/bookings/${bookingId}/status`, { action: 'approve' });
+      await fetchBookings();
+      showSuccess('Session confirmed successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to approve booking';
+      showError(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleReject = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setRejectModalOpen(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!selectedBookingId) return;
+
+    setIsProcessing(true);
+    try {
+      await api.patch(`/bookings/${selectedBookingId}/status`, {
+        action: 'reject',
+        reason: rejectionReason.trim() || undefined
+      });
+      await fetchBookings();
+      setRejectModalOpen(false);
+      setRejectionReason('');
+      setSelectedBookingId(null);
+      showSuccess('Booking request declined');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reject booking';
+      showError(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleMarkCompleted = async (bookingId: string) => {
-    if (confirm('Mark this session as completed?')) {
-      try {
-        await api.patch(`/bookings/${bookingId}/status`, { status: 'COMPLETED' });
-        await fetchBookings();
-      } catch (error: any) {
-        alert(error.message || 'Failed to mark session as completed');
-      }
+    setIsProcessing(true);
+    try {
+      await api.patch(`/bookings/${bookingId}/status`, { action: 'complete' });
+      await fetchBookings();
+      showSuccess('Session marked as completed successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark session as completed';
+      showError(errorMessage);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   // Filter bookings
   const now = new Date();
-  const upcomingBookings = bookings.filter(
-    b => (b.status === 'CONFIRMED' || b.status === 'PENDING') && new Date(b.dateTime) > now
+
+  const pendingBookings = bookings.filter(
+    b => b.status === 'PENDING'
+  ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const confirmedBookings = bookings.filter(
+    b => b.status === 'CONFIRMED' && new Date(b.dateTime) > now
   ).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
 
   const pastBookings = bookings.filter(
-    b => b.status === 'COMPLETED' || b.status === 'CANCELLED' ||
-    ((b.status === 'CONFIRMED' || b.status === 'PENDING') && new Date(b.dateTime) <= now)
+    b => b.status === 'COMPLETED' ||
+       b.status === 'CANCELLED' ||
+       b.status === 'REJECTED' ||
+       (b.status === 'CONFIRMED' && new Date(b.dateTime) <= now)
   ).sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
 
-  const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
+  const displayedBookings =
+    activeTab === 'pending' ? pendingBookings :
+    activeTab === 'confirmed' ? confirmedBookings :
+    pastBookings;
 
   return (
     <>
@@ -191,9 +253,65 @@ const TutorSessionsPage: React.FC = () => {
         }
 
         .status-cancelled {
+          background: rgba(156, 163, 175, 0.2);
+          color: #9ca3af;
+          border: 1px solid rgba(156, 163, 175, 0.3);
+        }
+
+        .status-rejected {
           background: rgba(239, 68, 68, 0.2);
           color: #f87171;
           border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .approve-btn {
+          padding: 10px 18px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+          color: white;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: none;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .approve-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .approve-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .reject-btn {
+          padding: 10px 18px;
+          border-radius: 10px;
+          background: rgba(239, 68, 68, 0.1);
+          border: 2px solid rgba(239, 68, 68, 0.3);
+          color: #f87171;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .reject-btn:hover {
+          background: rgba(239, 68, 68, 0.2);
+          transform: translateY(-2px);
+        }
+
+        .reject-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .complete-btn {
@@ -284,6 +402,115 @@ const TutorSessionsPage: React.FC = () => {
         .animate-fade-in-up {
           animation: fadeInUp 0.6s ease-out forwards;
         }
+
+        .student-message {
+          margin-top: 12px;
+          padding: 12px;
+          border-radius: 10px;
+          background: rgba(251, 191, 36, 0.05);
+          border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 16px;
+        }
+
+        .modal-content {
+          background: #1e293b;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+          padding: 24px;
+          max-width: 500px;
+          width: 100%;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #f1f5f9;
+          margin-bottom: 12px;
+        }
+
+        .modal-description {
+          color: #cbd5e1;
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+
+        .modal-textarea {
+          width: 100%;
+          padding: 12px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: white;
+          font-size: 14px;
+          resize: vertical;
+          min-height: 100px;
+          margin-bottom: 20px;
+        }
+
+        .modal-textarea:focus {
+          outline: none;
+          border-color: #fbbf24;
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+
+        .modal-cancel-btn {
+          padding: 10px 18px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #cbd5e1;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .modal-cancel-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-confirm-btn {
+          padding: 10px 18px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          border: none;
+          color: white;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .modal-confirm-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-confirm-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
       `}</style>
 
       <DashboardLayout allowedRoles={['TUTOR']}>
@@ -298,19 +525,26 @@ const TutorSessionsPage: React.FC = () => {
 
           {/* Tabs */}
           <div className="mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-            <div className="tab-container max-w-md">
+            <div className="tab-container max-w-2xl">
               <button
-                className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`}
-                onClick={() => setActiveTab('upcoming')}
+                className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+                onClick={() => setActiveTab('pending')}
               >
-                Upcoming
-                <span className="tab-count">{upcomingBookings.length}</span>
+                Pending Requests
+                <span className="tab-count">{pendingBookings.length}</span>
+              </button>
+              <button
+                className={`tab-btn ${activeTab === 'confirmed' ? 'active' : ''}`}
+                onClick={() => setActiveTab('confirmed')}
+              >
+                Confirmed Sessions
+                <span className="tab-count">{confirmedBookings.length}</span>
               </button>
               <button
                 className={`tab-btn ${activeTab === 'past' ? 'active' : ''}`}
                 onClick={() => setActiveTab('past')}
               >
-                Past
+                Past Sessions
                 <span className="tab-count">{pastBookings.length}</span>
               </button>
             </div>
@@ -333,11 +567,15 @@ const TutorSessionsPage: React.FC = () => {
                 <BookOpen className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">
-                {activeTab === 'upcoming' ? 'No Upcoming Sessions' : 'No Past Sessions'}
+                {activeTab === 'pending' ? 'No Pending Requests' :
+                 activeTab === 'confirmed' ? 'No Confirmed Sessions' :
+                 'No Past Sessions'}
               </h3>
               <p className="text-slate-400 text-sm max-w-md mx-auto">
-                {activeTab === 'upcoming'
-                  ? "You don't have any upcoming sessions. Students will be able to book sessions once your profile is complete."
+                {activeTab === 'pending'
+                  ? "You don't have any pending booking requests. Students can request sessions from your profile page."
+                  : activeTab === 'confirmed'
+                  ? "You don't have any confirmed sessions. Approved bookings will appear here."
                   : "You haven't completed any sessions yet. Your past sessions will appear here."}
               </p>
             </div>
@@ -363,7 +601,13 @@ const TutorSessionsPage: React.FC = () => {
                           <p className="text-slate-400 text-xs truncate">{booking.student.email}</p>
                         </div>
                       </div>
-                      <span className={`status-badge ${booking.status === 'CONFIRMED' ? 'status-confirmed' : booking.status === 'PENDING' ? 'status-pending' : booking.status === 'COMPLETED' ? 'status-completed' : 'status-cancelled'}`}>
+                      <span className={`status-badge ${
+                        booking.status === 'CONFIRMED' ? 'status-confirmed' :
+                        booking.status === 'PENDING' ? 'status-pending' :
+                        booking.status === 'REJECTED' ? 'status-rejected' :
+                        booking.status === 'COMPLETED' ? 'status-completed' :
+                        'status-cancelled'
+                      }`}>
                         {booking.status}
                       </span>
                     </div>
@@ -383,6 +627,46 @@ const TutorSessionsPage: React.FC = () => {
                         <span>{booking.duration} minutes</span>
                       </div>
                     </div>
+
+                    {/* Subject */}
+                    {booking.subject && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 text-sm">Subject:</span>
+                        <span className="px-3 py-1 rounded-lg text-sm font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                          {booking.subject}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Student's Message (PENDING status) */}
+                    {booking.status === 'PENDING' && booking.notes && !booking.notes.includes('[REJECTION REASON]') && (
+                      <div className="student-message">
+                        <p className="text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">Student&apos;s Message:</p>
+                        <p className="text-slate-300 text-sm">{booking.notes.replace('Booking during available slot', 'Requested during available time slot')}</p>
+                      </div>
+                    )}
+
+                    {/* Approve/Reject Actions for PENDING */}
+                    {booking.status === 'PENDING' && (
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          onClick={() => handleApprove(booking.id)}
+                          disabled={isProcessing}
+                          className="approve-btn"
+                        >
+                          <CheckCircle size={16} />
+                          Approve & Confirm
+                        </button>
+                        <button
+                          onClick={() => handleReject(booking.id)}
+                          disabled={isProcessing}
+                          className="reject-btn"
+                        >
+                          <X size={16} />
+                          Reject Request
+                        </button>
+                      </div>
+                    )}
 
                     {/* Review Display (if exists) */}
                     {booking.review && (
@@ -406,11 +690,12 @@ const TutorSessionsPage: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Actions */}
-                    {activeTab === 'upcoming' && booking.status === 'CONFIRMED' && new Date(booking.dateTime) <= now && (
+                    {/* Mark as Completed (for CONFIRMED past sessions) */}
+                    {activeTab === 'past' && booking.status === 'CONFIRMED' && new Date(booking.dateTime) <= now && (
                       <div className="flex justify-end">
                         <button
                           onClick={() => handleMarkCompleted(booking.id)}
+                          disabled={isProcessing}
                           className="complete-btn"
                         >
                           <CheckCircle size={16} />
@@ -425,6 +710,51 @@ const TutorSessionsPage: React.FC = () => {
           )}
         </div>
       </DashboardLayout>
+
+      {/* Rejection Reason Modal */}
+      {rejectModalOpen && (
+        <div className="modal-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setRejectModalOpen(false);
+            setRejectionReason('');
+            setSelectedBookingId(null);
+          }
+        }}>
+          <div className="modal-content">
+            <h2 className="modal-title">Reject Booking Request</h2>
+            <p className="modal-description">
+              Optionally provide a reason for rejecting this booking request. The student will see this message.
+            </p>
+            <textarea
+              className="modal-textarea"
+              placeholder="Reason for rejection (optional)..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              disabled={isProcessing}
+            />
+            <div className="modal-actions">
+              <button
+                className="modal-cancel-btn"
+                onClick={() => {
+                  setRejectModalOpen(false);
+                  setRejectionReason('');
+                  setSelectedBookingId(null);
+                }}
+                disabled={isProcessing}
+              >
+                Cancel
+              </button>
+              <button
+                className="modal-confirm-btn"
+                onClick={handleRejectConfirm}
+                disabled={isProcessing}
+              >
+                {isProcessing ? 'Rejecting...' : 'Reject Request'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

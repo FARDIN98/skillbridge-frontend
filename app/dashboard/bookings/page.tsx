@@ -6,12 +6,15 @@ import BookingCard from '../../../src/components/BookingCard';
 import ReviewModal from '../../../src/components/ReviewModal';
 import api from '../../../src/lib/api';
 import { BookOpen } from 'lucide-react';
+import { useToast } from '../../../src/contexts/ToastContext';
 
 interface Booking {
   id: string;
   dateTime: string;
   duration: number;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
+  subject?: string;
+  notes?: string;
   createdAt: string;
   tutor: {
     id: string;
@@ -29,14 +32,15 @@ interface Booking {
   };
 }
 
-type TabType = 'upcoming' | 'past';
+type TabType = 'pending' | 'confirmed' | 'past';
 
 const BookingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('upcoming');
+  const [activeTab, setActiveTab] = useState<TabType>('pending');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const { showSuccess, showError } = useToast();
 
   const fetchBookings = async () => {
     try {
@@ -57,11 +61,13 @@ const BookingsPage: React.FC = () => {
 
   const handleCancelBooking = async (bookingId: string) => {
     try {
-      await api.patch(`/bookings/${bookingId}/status`, { status: 'CANCELLED' });
+      await api.patch(`/bookings/${bookingId}/status`, { action: 'cancel' });
       // Refresh bookings
       await fetchBookings();
-    } catch (error: any) {
-      alert(error.message || 'Failed to cancel booking');
+      showSuccess('Booking cancelled successfully');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to cancel booking';
+      showError(errorMessage);
       throw error;
     }
   };
@@ -94,16 +100,26 @@ const BookingsPage: React.FC = () => {
 
   // Filter bookings based on active tab
   const now = new Date();
-  const upcomingBookings = bookings.filter(
-    b => (b.status === 'CONFIRMED' || b.status === 'PENDING') && new Date(b.dateTime) > now
+
+  const pendingBookings = bookings.filter(
+    b => b.status === 'PENDING'
+  ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const confirmedBookings = bookings.filter(
+    b => b.status === 'CONFIRMED' && new Date(b.dateTime) > now
   ).sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
 
   const pastBookings = bookings.filter(
-    b => b.status === 'COMPLETED' || b.status === 'CANCELLED' ||
-    ((b.status === 'CONFIRMED' || b.status === 'PENDING') && new Date(b.dateTime) <= now)
+    b => b.status === 'COMPLETED' ||
+       b.status === 'CANCELLED' ||
+       b.status === 'REJECTED' ||
+       (b.status === 'CONFIRMED' && new Date(b.dateTime) <= now)
   ).sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
 
-  const displayedBookings = activeTab === 'upcoming' ? upcomingBookings : pastBookings;
+  const displayedBookings =
+    activeTab === 'pending' ? pendingBookings :
+    activeTab === 'confirmed' ? confirmedBookings :
+    pastBookings;
 
   return (
     <>
@@ -228,13 +244,20 @@ const BookingsPage: React.FC = () => {
 
           {/* Tabs */}
           <div className="mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-            <div className="tab-container max-w-md">
+            <div className="tab-container max-w-2xl">
               <button
-                className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`}
-                onClick={() => setActiveTab('upcoming')}
+                className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+                onClick={() => setActiveTab('pending')}
               >
-                Upcoming
-                <span className="tab-count">{upcomingBookings.length}</span>
+                Pending Requests
+                <span className="tab-count">{pendingBookings.length}</span>
+              </button>
+              <button
+                className={`tab-btn ${activeTab === 'confirmed' ? 'active' : ''}`}
+                onClick={() => setActiveTab('confirmed')}
+              >
+                Confirmed
+                <span className="tab-count">{confirmedBookings.length}</span>
               </button>
               <button
                 className={`tab-btn ${activeTab === 'past' ? 'active' : ''}`}
@@ -263,11 +286,15 @@ const BookingsPage: React.FC = () => {
                 <BookOpen className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">
-                {activeTab === 'upcoming' ? 'No Upcoming Bookings' : 'No Past Bookings'}
+                {activeTab === 'pending' ? 'No Pending Requests' :
+                 activeTab === 'confirmed' ? 'No Confirmed Sessions' :
+                 'No Past Bookings'}
               </h3>
               <p className="text-slate-400 text-sm max-w-md mx-auto">
-                {activeTab === 'upcoming'
-                  ? "You don't have any upcoming sessions. Browse tutors to book your first session!"
+                {activeTab === 'pending'
+                  ? "You don't have any pending booking requests. Browse tutors to request a session!"
+                  : activeTab === 'confirmed'
+                  ? "You don't have any confirmed sessions. Your approved bookings will appear here."
                   : "You haven't completed any sessions yet. Your past bookings will appear here."}
               </p>
             </div>

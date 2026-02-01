@@ -12,7 +12,9 @@ interface Booking {
   id: string;
   dateTime: string;
   duration: number;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
+  subject?: string;
+  notes?: string;
   createdAt: string;
   student: {
     id: string;
@@ -72,6 +74,13 @@ const TutorDashboard: React.FC = () => {
           b => (b.status === 'CONFIRMED' || b.status === 'PENDING') && new Date(b.dateTime) > now
         );
         const completed = allBookings.filter(b => b.status === 'COMPLETED');
+
+        // Debug logging
+        console.log('🔍 Debug Info:');
+        console.log('Total bookings:', allBookings.length);
+        console.log('All bookings:', allBookings);
+        console.log('Upcoming bookings:', upcoming);
+        console.log('Current time:', now);
 
         // Calculate earnings
         const earnings = completed.reduce((total, booking) => {

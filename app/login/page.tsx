@@ -223,12 +223,6 @@ const LoginPage: React.FC = () => {
           transform: translateY(0);
         }
 
-        .demo-card {
-          background: rgba(251, 191, 36, 0.05);
-          border: 1px solid rgba(251, 191, 36, 0.2);
-          backdrop-filter: blur(10px);
-        }
-
         .link-text {
           color: #fbbf24;
           transition: all 0.3s ease;
@@ -346,19 +340,6 @@ const LoginPage: React.FC = () => {
                 {!isSubmitting && <ArrowRight className="h-4 w-4" />}
               </LoadingButton>
             </form>
-
-            {/* Demo Credentials */}
-            <div className="demo-card mt-6 p-4 rounded-xl">
-              <p className="text-xs font-semibold text-amber-400 mb-2 flex items-center gap-2">
-                <Sparkles className="h-3 w-3" />
-                Demo Accounts
-              </p>
-              <div className="text-xs text-slate-300 space-y-1.5">
-                <p><span className="text-amber-400 font-medium">Admin:</span> admin@skillbridge.com / Admin123!</p>
-                <p><span className="text-amber-400 font-medium">Tutor:</span> alice.johnson@example.com / Admin123!</p>
-                <p><span className="text-amber-400 font-medium">Student:</span> john.doe@example.com / Admin123!</p>
-              </div>
-            </div>
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center">

@@ -24,6 +24,8 @@ const DAYS_OF_WEEK = [
 const TutorAvailabilityPage: React.FC = () => {
   const [availability, setAvailability] = useState<string[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [originalAvailability, setOriginalAvailability] = useState<string[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newSlot, setNewSlot] = useState<TimeSlot>({
     day: 'Monday',
     startTime: '09:00',
@@ -42,6 +44,7 @@ const TutorAvailabilityPage: React.FC = () => {
 
         if (profile && profile.availability) {
           setAvailability(profile.availability);
+          setOriginalAvailability(profile.availability);
           // Parse availability strings into TimeSlot objects
           const slots: TimeSlot[] = profile.availability.map((slot: string) => {
             const [day, timeRange] = slot.split(' ');
@@ -81,6 +84,7 @@ const TutorAvailabilityPage: React.FC = () => {
 
     setTimeSlots(prev => [...prev, newSlot]);
     setAvailability(prev => [...prev, formatted]);
+    setHasUnsavedChanges(true);
     setError(null);
 
     // Reset form
@@ -94,6 +98,7 @@ const TutorAvailabilityPage: React.FC = () => {
   const handleRemoveSlot = (index: number) => {
     setTimeSlots(prev => prev.filter((_, i) => i !== index));
     setAvailability(prev => prev.filter((_, i) => i !== index));
+    setHasUnsavedChanges(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,6 +115,8 @@ const TutorAvailabilityPage: React.FC = () => {
 
     try {
       await api.put('/tutors/availability', { availability });
+      setOriginalAvailability(availability);
+      setHasUnsavedChanges(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
@@ -129,397 +136,161 @@ const TutorAvailabilityPage: React.FC = () => {
 
   if (loading) {
     return (
-      <>
-        <style jsx global>{`
-          .loading-screen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 400px;
-          }
-          .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(251, 191, 36, 0.1);
-            border-top-color: #fbbf24;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-        <DashboardLayout allowedRoles={['TUTOR']}>
-          <div className="loading-screen">
-            <div className="loading-spinner" />
-          </div>
-        </DashboardLayout>
-      </>
+      <DashboardLayout allowedRoles={['TUTOR']}>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="w-12 h-12 border-3 border-amber-400/10 border-t-amber-400 rounded-full animate-spin" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
-
-        .availability-page {
-          font-family: 'Inter', sans-serif;
-        }
-
-        .page-title {
-          font-family: 'Playfair Display', serif;
-          font-weight: 700;
-          color: #f1f5f9;
-        }
-
-        .glass-card {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        .form-label {
-          display: block;
-          color: #cbd5e1;
-          font-size: 14px;
-          font-weight: 500;
-          margin-bottom: 8px;
-        }
-
-        .form-select, .form-input {
-          width: 100%;
-          padding: 12px 16px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #f1f5f9;
-          font-size: 14px;
-          transition: all 0.3s ease;
-        }
-
-        .form-select:focus, .form-input:focus {
-          outline: none;
-          background: rgba(255, 255, 255, 0.08);
-          border-color: #fbbf24;
-          box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
-        }
-
-        .error-message {
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #f87171;
-          padding: 12px 16px;
-          border-radius: 12px;
-          font-size: 13px;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .success-message {
-          background: rgba(34, 197, 94, 0.1);
-          border: 1px solid rgba(34, 197, 94, 0.3);
-          color: #4ade80;
-          padding: 12px 16px;
-          border-radius: 12px;
-          font-size: 13px;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .add-slot-form {
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr auto;
-          gap: 12px;
-          align-items: end;
-          margin-bottom: 24px;
-        }
-
-        @media (max-width: 768px) {
-          .add-slot-form {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .add-btn {
-          padding: 12px 20px;
-          border-radius: 12px;
-          background: rgba(251, 191, 36, 0.1);
-          border: 1px solid rgba(251, 191, 36, 0.3);
-          color: #fbbf24;
-          font-weight: 600;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          white-space: nowrap;
-        }
-
-        .add-btn:hover {
-          background: rgba(251, 191, 36, 0.2);
-        }
-
-        .day-section {
-          margin-bottom: 16px;
-        }
-
-        .day-header {
-          color: #fbbf24;
-          font-weight: 600;
-          font-size: 16px;
-          margin-bottom: 8px;
-          padding: 8px 12px;
-          background: rgba(251, 191, 36, 0.05);
-          border-radius: 8px;
-          border: 1px solid rgba(251, 191, 36, 0.2);
-        }
-
-        .time-slot {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 12px 16px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          margin-bottom: 8px;
-          transition: all 0.3s ease;
-        }
-
-        .time-slot:hover {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: rgba(251, 191, 36, 0.3);
-        }
-
-        .time-text {
-          color: #cbd5e1;
-          font-size: 14px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .remove-btn {
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #f87171;
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 12px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .remove-btn:hover {
-          background: rgba(239, 68, 68, 0.2);
-        }
-
-        .submit-btn {
-          width: 100%;
-          padding: 14px 24px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-          color: #0f172a;
-          font-weight: 600;
-          font-size: 14px;
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .submit-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
-        }
-
-        .submit-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid #0f172a;
-          border-top-color: transparent;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 48px 24px;
-          color: #64748b;
-        }
-      `}</style>
-
-      <DashboardLayout allowedRoles={['TUTOR']}>
-        <div className="availability-page">
-          {/* Header */}
-          <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-            <h1 className="page-title text-3xl md:text-4xl mb-2">Availability</h1>
-            <p className="text-slate-400 text-sm md:text-base">
-              Set your available time slots for students to book sessions
-            </p>
-          </div>
-
-          {/* Main Form */}
-          <div className="glass-card rounded-2xl p-6 md:p-8 animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <div className="error-message">
-                  <AlertCircle size={16} />
-                  {error}
-                </div>
-              )}
-
-              {success && (
-                <div className="success-message">
-                  <CheckCircle size={16} />
-                  Availability updated successfully!
-                </div>
-              )}
-
-              {/* Add Time Slot Form */}
-              <div className="mb-6">
-                <h3 className="text-white font-semibold mb-4">Add Time Slot</h3>
-                <div className="add-slot-form">
-                  <div>
-                    <label className="form-label">Day</label>
-                    <select
-                      value={newSlot.day}
-                      onChange={(e) => setNewSlot(prev => ({ ...prev, day: e.target.value }))}
-                      className="form-select"
-                    >
-                      {DAYS_OF_WEEK.map(day => (
-                        <option key={day} value={day}>{day}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="form-label">Start Time</label>
-                    <input
-                      type="time"
-                      value={newSlot.startTime}
-                      onChange={(e) => setNewSlot(prev => ({ ...prev, startTime: e.target.value }))}
-                      className="form-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label">End Time</label>
-                    <input
-                      type="time"
-                      value={newSlot.endTime}
-                      onChange={(e) => setNewSlot(prev => ({ ...prev, endTime: e.target.value }))}
-                      className="form-input"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddSlot}
-                    className="add-btn"
-                  >
-                    <Plus size={16} />
-                    Add
-                  </button>
-                </div>
-              </div>
-
-              {/* Current Availability */}
-              <div className="mb-6">
-                <h3 className="text-white font-semibold mb-4">Your Availability</h3>
-                {timeSlots.length === 0 ? (
-                  <div className="empty-state">
-                    <p>No time slots added yet. Add your first slot above.</p>
-                  </div>
-                ) : (
-                  <div>
-                    {slotsByDay.map(({ day, slots }) =>
-                      slots.length > 0 && (
-                        <div key={day} className="day-section">
-                          <div className="day-header">{day}</div>
-                          {slots.map(({ startTime, endTime, originalIndex }) => (
-                            <div key={originalIndex} className="time-slot">
-                              <div className="time-text">
-                                <Clock size={16} />
-                                {startTime} - {endTime}
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveSlot(originalIndex)}
-                                className="remove-btn"
-                              >
-                                <X size={14} />
-                                Remove
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="submit-btn"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="spinner" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save size={16} />
-                    Save Availability
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
+    <DashboardLayout allowedRoles={['TUTOR']}>
+      <div className="font-sans">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-serif font-bold text-slate-100 text-3xl md:text-4xl mb-2">Availability</h1>
+          <p className="text-slate-400 text-sm md:text-base">
+            Set your available time slots for students to book sessions
+          </p>
         </div>
-      </DashboardLayout>
-    </>
+
+        {/* Main Form */}
+        <div className="bg-white/3 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 md:p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl text-sm mb-4 flex items-center gap-2">
+                <AlertCircle size={16} />
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-500/10 border border-green-500/30 text-green-400 p-3 rounded-xl text-sm mb-4 flex items-center gap-2">
+                <CheckCircle size={16} />
+                Availability updated successfully!
+              </div>
+            )}
+
+            {hasUnsavedChanges && !success && (
+              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-3 rounded-xl text-sm mb-4 flex items-center gap-2">
+                <AlertCircle size={16} />
+                You have unsaved changes. Click &quot;Save Availability&quot; to persist them.
+              </div>
+            )}
+
+            {/* Add Time Slot Form */}
+            <div className="mb-6">
+              <h3 className="text-white font-semibold mb-4">Add Time Slot</h3>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
+                <div>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">Day</label>
+                  <select
+                    value={newSlot.day}
+                    onChange={(e) => setNewSlot(prev => ({ ...prev, day: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 text-sm transition-all focus:outline-none focus:bg-white/8 focus:border-amber-400 focus:ring-3 focus:ring-amber-400/10 [&>option]:bg-slate-800 [&>option]:text-slate-100 [&>option]:py-3"
+                  >
+                    {DAYS_OF_WEEK.map(day => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">Start Time</label>
+                  <input
+                    type="time"
+                    value={newSlot.startTime}
+                    onChange={(e) => setNewSlot(prev => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 text-sm transition-all focus:outline-none focus:bg-white/8 focus:border-amber-400 focus:ring-3 focus:ring-amber-400/10"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">End Time</label>
+                  <input
+                    type="time"
+                    value={newSlot.endTime}
+                    onChange={(e) => setNewSlot(prev => ({ ...prev, endTime: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-100 text-sm transition-all focus:outline-none focus:bg-white/8 focus:border-amber-400 focus:ring-3 focus:ring-amber-400/10"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddSlot}
+                  className="px-5 py-3 rounded-xl bg-amber-400/10 border border-amber-400/30 text-amber-400 font-semibold text-sm cursor-pointer transition-all hover:bg-amber-400/20 flex items-center gap-2 whitespace-nowrap justify-center"
+                >
+                  <Plus size={16} />
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Current Availability */}
+            <div className="mb-6">
+              <h3 className="text-white font-semibold mb-4">Your Availability</h3>
+              {timeSlots.length === 0 ? (
+                <div className="text-center py-12 text-slate-500">
+                  <p>No time slots added yet. Add your first slot above.</p>
+                </div>
+              ) : (
+                <div>
+                  {slotsByDay.map(({ day, slots }) =>
+                    slots.length > 0 && (
+                      <div key={day} className="mb-4">
+                        <div className="text-amber-400 font-semibold text-base mb-2 px-3 py-2 bg-amber-400/5 rounded-lg border border-amber-400/20">
+                          {day}
+                        </div>
+                        {slots.map(({ startTime, endTime, originalIndex }) => (
+                          <div
+                            key={originalIndex}
+                            className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/3 border border-white/10 mb-2 transition-all hover:bg-white/5 hover:border-amber-400/30"
+                          >
+                            <div className="text-slate-300 text-sm flex items-center gap-2">
+                              <Clock size={16} />
+                              {startTime} - {endTime}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSlot(originalIndex)}
+                              className="bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg text-xs cursor-pointer transition-all hover:bg-red-500/20 flex items-center gap-1"
+                            >
+                              <X size={14} />
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting || !hasUnsavedChanges}
+              className={`w-full px-6 py-3.5 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 font-semibold text-sm border-0 cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                hasUnsavedChanges && !isSubmitting
+                  ? 'hover:shadow-[0_10px_30px_rgba(251,191,36,0.3)] hover:-translate-y-0.5 animate-pulse'
+                  : 'opacity-60 cursor-not-allowed'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Availability
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

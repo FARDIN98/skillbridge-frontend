@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, DollarSign, X, Star } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '../contexts/ToastContext';
 
 interface Booking {
   id: string;
   dateTime: string;
   duration: number;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
+  subject?: string;
+  notes?: string;
   createdAt: string;
   tutor: {
     id: string;
@@ -40,21 +43,26 @@ const BookingCard: React.FC<BookingCardProps> = ({
   showActions = true
 }) => {
   const [isCancelling, setIsCancelling] = useState(false);
+  const { showWarning } = useToast();
 
   const handleCancel = async () => {
     if (!onCancel) return;
 
-    // Check if booking is within 24 hours
     const bookingDate = new Date(booking.dateTime);
     const now = new Date();
     const hoursUntilBooking = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-    if (hoursUntilBooking < 24) {
-      alert('Cannot cancel bookings within 24 hours of the scheduled time.');
+    // For confirmed bookings, check 24 hour window
+    if (booking.status === 'CONFIRMED' && hoursUntilBooking < 24) {
+      showWarning('Cannot cancel confirmed bookings within 24 hours of the scheduled time.');
       return;
     }
 
-    if (confirm('Are you sure you want to cancel this booking?')) {
+    const confirmMessage = booking.status === 'PENDING'
+      ? 'Are you sure you want to cancel this booking request?'
+      : 'Are you sure you want to cancel this booking?';
+
+    if (confirm(confirmMessage)) {
       setIsCancelling(true);
       try {
         await onCancel(booking.id);
@@ -78,10 +86,12 @@ const BookingCard: React.FC<BookingCardProps> = ({
         return 'bg-green-500/20 text-green-400 border border-green-500/30';
       case 'PENDING':
         return 'bg-amber-400/20 text-amber-400 border border-amber-400/30';
+      case 'REJECTED':
+        return 'bg-red-500/20 text-red-400 border border-red-500/30';
       case 'COMPLETED':
         return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
       case 'CANCELLED':
-        return 'bg-red-500/20 text-red-400 border border-red-500/30';
+        return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
       default:
         return 'bg-amber-400/20 text-amber-400 border border-amber-400/30';
     }
@@ -141,6 +151,34 @@ const BookingCard: React.FC<BookingCardProps> = ({
               </div>
             )}
           </div>
+
+          {/* Subject */}
+          {booking.subject && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 text-sm">Subject:</span>
+              <span className="px-3 py-1 rounded-lg text-sm font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                {booking.subject}
+              </span>
+            </div>
+          )}
+
+          {/* Student's Message (PENDING status) */}
+          {booking.status === 'PENDING' && booking.notes && !booking.notes.includes('[REJECTION REASON]') && (
+            <div className="p-3 rounded-xl bg-amber-400/5 border border-amber-400/20">
+              <p className="text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">Your Message:</p>
+              <p className="text-slate-300 text-sm">{booking.notes.replace('Booking during available slot', 'Requested during available time slot')}</p>
+            </div>
+          )}
+
+          {/* Rejection Reason (REJECTED status) */}
+          {booking.status === 'REJECTED' && booking.notes && booking.notes.includes('[REJECTION REASON]') && (
+            <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+              <p className="text-red-400 text-xs font-semibold uppercase tracking-wider mb-1">Rejection Reason:</p>
+              <p className="text-slate-300 text-sm">
+                {booking.notes.split('[REJECTION REASON]')[1]?.trim() || 'No reason provided'}
+              </p>
+            </div>
+          )}
 
           {/* Subjects */}
           {booking.tutor.tutorProfile?.subjects && booking.tutor.tutorProfile.subjects.length > 0 && (

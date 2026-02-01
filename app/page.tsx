@@ -24,21 +24,28 @@ import {
   Users,
   GraduationCap,
   TrendingUp,
-  Sparkles,
-  Quote
+  Sparkles
 } from 'lucide-react';
 
 interface Tutor {
   id: string;
-  name: string;
-  email: string;
-  tutorProfile?: {
-    bio?: string;
-    hourlyRate: number;
-    subjects: string[];
-    rating: number;
-    reviewCount: number;
+  userId: string;
+  bio: string | null;
+  hourlyRate: number;
+  subjects: string[];
+  experience: number;
+  rating: number;
+  reviewCount: number;
+  user: {
+    id: string;
+    name: string;
+    email: string;
   };
+  categories: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
 }
 
 interface Category {
@@ -71,7 +78,6 @@ export default function HomePage() {
   const howItWorksSection = useInView({ threshold: 0.1, triggerOnce: true });
   const categoriesSection = useInView({ threshold: 0.1, triggerOnce: true });
   const statsSection = useInView({ threshold: 0.2, triggerOnce: true });
-  const testimonialsSection = useInView({ threshold: 0.1, triggerOnce: true });
   const ctaSection = useInView({ threshold: 0.2, triggerOnce: true });
 
   useEffect(() => {
@@ -213,25 +219,25 @@ export default function HomePage() {
                   >
                     <div className="flex items-start gap-4 mb-4">
                       <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 font-bold h-16 w-16 rounded-full flex items-center justify-center text-xl flex-shrink-0">
-                        {tutor.name.charAt(0)}
+                        {tutor.user.name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-white font-semibold text-lg mb-1">{tutor.name}</h3>
+                        <h3 className="text-white font-semibold text-lg mb-1">{tutor.user.name}</h3>
                         <div className="flex items-center gap-2">
-                          <StarRating rating={tutor.tutorProfile?.rating || 0} size="sm" />
+                          <StarRating rating={tutor.rating || 0} size="sm" />
                           <span className="text-slate-400 text-sm">
-                            ({tutor.tutorProfile?.reviewCount || 0})
+                            ({tutor.reviewCount || 0})
                           </span>
                         </div>
                       </div>
                     </div>
 
                     <p className="text-slate-300 text-sm mb-4 line-clamp-2">
-                      {tutor.tutorProfile?.bio || 'Experienced tutor ready to help you succeed.'}
+                      {tutor.bio || 'Experienced tutor ready to help you succeed.'}
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {tutor.tutorProfile?.subjects.slice(0, 3).map((subject, i) => (
+                      {tutor.subjects.slice(0, 3).map((subject, i) => (
                         <span key={i} className="bg-amber-400/10 text-amber-400 border border-amber-400/20 text-xs px-3 py-1 rounded-full">
                           {subject}
                         </span>
@@ -241,12 +247,12 @@ export default function HomePage() {
                     <div className="flex items-center justify-between pt-4 border-t border-slate-700">
                       <div>
                         <span className="text-2xl font-bold text-amber-400">
-                          ${tutor.tutorProfile?.hourlyRate || 0}
+                          ${tutor.hourlyRate || 0}
                         </span>
                         <span className="text-slate-400 text-sm">/hour</span>
                       </div>
                       <Link
-                        href={`/tutors/${tutor.id}`}
+                        href={`/tutors/${tutor.userId}`}
                         className="text-amber-400 hover:text-amber-300 font-medium text-sm flex items-center gap-1"
                       >
                         View Profile
@@ -400,63 +406,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section ref={testimonialsSection.ref} className="py-20 px-4 relative">
-          <div className="max-w-7xl mx-auto">
-            <div className={`text-center mb-16 transition-all duration-700 ${testimonialsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">What Students Say</h2>
-              <p className="text-base sm:text-lg text-slate-400">Real feedback from our learning community</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  name: 'Sarah Johnson',
-                  role: 'College Student',
-                  text: 'SkillBridge helped me find the perfect math tutor. My grades improved from C to A in just two months!',
-                  rating: 5
-                },
-                {
-                  name: 'Michael Chen',
-                  role: 'Professional',
-                  text: 'Learning Python here changed my career. The tutors are knowledgeable and patient.',
-                  rating: 5
-                },
-                {
-                  name: 'Emily Rodriguez',
-                  role: 'High School Student',
-                  text: 'The chemistry tutor I found here made complex topics so easy to understand. Highly recommend!',
-                  rating: 5
-                }
-              ].map((testimonial, index) => (
-                <div
-                  key={index}
-                  className={`bg-white/2 border border-white/8 backdrop-blur-xl rounded-2xl p-8 transition-all duration-700 ${
-                    testimonialsSection.isInView
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{
-                    transitionDelay: testimonialsSection.isInView ? `${index * 150}ms` : '0ms'
-                  }}
-                >
-                  <Quote className="h-10 w-10 text-amber-400 mb-4 opacity-50" />
-                  <p className="text-slate-300 mb-6 text-base leading-relaxed">"{testimonial.text}"</p>
-                  <div className="flex items-center gap-4">
-                    <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 font-bold h-12 w-12 rounded-full flex items-center justify-center text-sm flex-shrink-0">
-                      {testimonial.name.charAt(0)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-white font-semibold">{testimonial.name}</div>
-                      <div className="text-slate-400 text-sm">{testimonial.role}</div>
-                    </div>
-                    <StarRating rating={testimonial.rating} size="sm" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Final CTA Section */}
         <section ref={ctaSection.ref} className="py-20 px-4 relative">

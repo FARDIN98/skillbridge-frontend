@@ -58,89 +58,107 @@ const Navbar: React.FC = () => {
         Skip to main content
       </a>
 
-      <nav className="bg-slate-950/90 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40">
+      <nav className="bg-slate-950/95 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 shadow-lg shadow-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-amber-400 hover:text-amber-300 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950 rounded-lg px-2"
+              className="flex items-center gap-2.5 text-xl sm:text-2xl font-bold text-white hover:text-amber-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400/50 rounded-lg px-2 group"
             >
-              <BookOpen className="h-6 w-6 sm:h-7 sm:w-7" />
-              <span>SkillBridge</span>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-amber-400 to-amber-500 group-hover:from-amber-500 group-hover:to-amber-600 transition-all duration-200 shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-slate-900" />
+              </div>
+              <span className="bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent group-hover:from-amber-400 group-hover:to-amber-500">
+                SkillBridge
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              <Link
-                href="/"
-                className={`text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                  isActive('/') ? 'text-amber-400' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                Home
-              </Link>
-              <Link
-                href="/tutors"
-                className={`text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                  isActive('/tutors') ? 'text-amber-400' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                Find Tutors
-              </Link>
+            <div className="hidden md:flex items-center gap-8">
+              {/* Nav Links */}
+              <div className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className={`text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 ${
+                    isActive('/')
+                      ? 'text-amber-400 bg-amber-400/10'
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/tutors"
+                  className={`text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 ${
+                    isActive('/tutors')
+                      ? 'text-amber-400 bg-amber-400/10'
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  Find Tutors
+                </Link>
 
-              {/* Auth state with fade transition */}
-              <div className="transition-opacity duration-200">
-                {isAuthenticated && user ? (
-                  <>
-                    <Link
-                      href={getDashboardLink()}
-                      className={`flex items-center gap-1 text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                        pathname.startsWith('/dashboard') || pathname.startsWith('/tutor') || pathname.startsWith('/admin')
-                          ? 'text-amber-400'
-                          : 'text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Link>
-
-                    <div className="flex items-center gap-3 ml-4 pl-4 border-l border-white/10">
-                      <div className="flex items-center gap-2">
-                        <User className="h-5 w-5 text-slate-400" />
-                        <span className="text-sm font-medium text-white">{user.name}</span>
-                        <span className="text-xs text-slate-300 bg-white/10 px-2 py-1 rounded-full">
-                          {user.role}
-                        </span>
-                      </div>
-
-                      <button
-                        onClick={logout}
-                        className="flex items-center gap-1 text-sm font-medium text-slate-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950"
-                        aria-label="Logout"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href="/login"
-                      className="text-sm font-medium text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="text-sm font-medium bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 px-4 py-2 rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg shadow-amber-500/20 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950"
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
+                {isAuthenticated && user && (
+                  <Link
+                    href={getDashboardLink()}
+                    className={`flex items-center gap-2 text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 ${
+                      pathname.startsWith('/dashboard') || pathname.startsWith('/tutor') || pathname.startsWith('/admin')
+                        ? 'text-amber-400 bg-amber-400/10'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
                 )}
               </div>
+
+              {/* Auth Section */}
+              {isAuthenticated && user ? (
+                <div className="flex items-center gap-3 pl-6 border-l border-white/10">
+                  {/* User Profile */}
+                  <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-slate-900 font-bold text-sm border-2 border-amber-400/30">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+
+                    {/* User Info */}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-white leading-tight">{user.name}</span>
+                      <span className="text-xs font-medium text-amber-400 leading-tight">
+                        {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Logout Button */}
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-red-400 transition-all px-3 py-2 rounded-lg hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-400/50 border border-transparent hover:border-red-500/30"
+                    aria-label="Logout"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/login"
+                    className="text-sm font-semibold text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-white/5 border border-white/10 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="text-sm font-semibold bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 px-5 py-2 rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Mobile menu button */}
