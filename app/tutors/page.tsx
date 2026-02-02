@@ -9,7 +9,6 @@ import {
   SlidersHorizontal,
   Star,
   BookOpen,
-  DollarSign,
   Users,
   Sparkles,
   ChevronDown,
@@ -301,11 +300,11 @@ const TutorsPageContent = () => {
               {/* Price Range Filter */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-slate-300 mb-3">
-                  Price Range ($/hour)
+                  Price Range (৳/hour)
                 </label>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs text-slate-400 mb-2">Min: ${priceRange.min}</label>
+                    <label className="block text-xs text-slate-400 mb-2">Min: ৳{priceRange.min}</label>
                     <input
                       type="range"
                       min="0"
@@ -319,7 +318,7 @@ const TutorsPageContent = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-400 mb-2">Max: ${priceRange.max}</label>
+                    <label className="block text-xs text-slate-400 mb-2">Max: ৳{priceRange.max}</label>
                     <input
                       type="range"
                       min="0"
@@ -454,9 +453,8 @@ const TutorsPageContent = () => {
                       </div>
 
                       {/* Price */}
-                      <div className="flex items-center justify-center gap-2 mb-4 text-emerald-400 font-bold text-lg">
-                        <DollarSign className="h-5 w-5" />
-                        {tutor.hourlyRate}/hr
+                      <div className="flex items-center justify-center mb-4 text-emerald-400 font-bold text-lg">
+                        ৳{tutor.hourlyRate}/hr
                       </div>
 
                       {/* View Profile Button */}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Calendar, Clock, DollarSign, User, MessageSquare } from 'lucide-react';
+import { X, Calendar, Clock, User, MessageSquare } from 'lucide-react';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
 import api from '../lib/api';
 import Button from './Button';
@@ -433,12 +433,11 @@ const BookingModal: React.FC<BookingModalProps> = ({
                   <span className="text-white font-semibold">{duration} minutes</span>
                 </div>
                 <div className="border-t border-white/10 pt-3 flex items-center justify-between">
-                  <span className="text-white font-semibold flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-amber-400" />
+                  <span className="text-white font-semibold">
                     Total Price
                   </span>
                   <span className="text-2xl font-bold text-amber-400">
-                    ${totalPrice.toFixed(2)}
+                    ৳{totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>

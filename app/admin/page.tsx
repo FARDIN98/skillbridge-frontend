@@ -119,7 +119,7 @@ const AdminDashboard: React.FC = () => {
     },
     {
       title: 'Total Revenue',
-      value: `$${(stats.totalRevenue || 0).toFixed(2)}`,
+      value: `৳${(stats.totalRevenue || 0).toFixed(2)}`,
       icon: DollarSign,
       color: 'from-emerald-500 to-emerald-600',
       bgColor: 'bg-emerald-500/10',
@@ -157,18 +157,6 @@ const AdminDashboard: React.FC = () => {
   return (
     <>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
-
-        .admin-dashboard {
-          font-family: 'Inter', sans-serif;
-        }
-
-        .page-title {
-          font-family: 'Playfair Display', serif;
-          font-weight: 700;
-          color: #f1f5f9;
-        }
-
         .stat-card {
           background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px);
@@ -196,7 +184,6 @@ const AdminDashboard: React.FC = () => {
         }
 
         .stat-value {
-          font-family: 'Playfair Display', serif;
           font-weight: 700;
           font-size: 32px;
           color: #f1f5f9;
@@ -221,13 +208,6 @@ const AdminDashboard: React.FC = () => {
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 16px;
           padding: 24px;
-        }
-
-        .section-title {
-          color: #f1f5f9;
-          font-weight: 600;
-          font-size: 18px;
-          margin-bottom: 20px;
         }
 
         .booking-row {
@@ -346,10 +326,10 @@ const AdminDashboard: React.FC = () => {
       `}</style>
 
       <DashboardLayout allowedRoles={['ADMIN']}>
-        <div className="admin-dashboard">
+        <div>
           {/* Header */}
           <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-            <h1 className="page-title text-3xl md:text-4xl mb-2">Admin Dashboard</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-100 mb-2">Admin Dashboard</h1>
             <p className="text-slate-400 text-sm md:text-base">
               Manage users, bookings, and platform statistics
             </p>
@@ -395,7 +375,7 @@ const AdminDashboard: React.FC = () => {
           {/* Recent Bookings */}
           <div className="section-card animate-fade-in-up mb-8" style={{ animationDelay: '0.5s', opacity: 0 }}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="section-title mb-0">Recent Bookings</h2>
+              <h2 className="text-slate-100 font-semibold text-lg">Recent Bookings</h2>
               <button
                 onClick={() => router.push('/admin/bookings')}
                 className="action-btn"

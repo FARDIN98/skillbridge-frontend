@@ -375,7 +375,7 @@ const TutorDashboard: React.FC = () => {
                   </div>
                 </div>
                 <p className="text-slate-400 text-sm mb-1">Earnings</p>
-                <p className="text-3xl font-bold text-white">${stats.totalEarnings.toFixed(0)}</p>
+                <p className="text-3xl font-bold text-white">৳{stats.totalEarnings.toFixed(0)}</p>
               </div>
 
               {/* Rating */}

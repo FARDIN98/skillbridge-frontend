@@ -9,7 +9,7 @@ import { getErrorMessage, logError } from '../../../src/lib/errors';
 import { validateForm, ValidationErrors } from '../../../src/lib/validation';
 import { CategoryCardSkeleton } from '../../../src/components/Skeleton';
 import { LoadingButton } from '../../../src/components/ButtonSpinner';
-import { Search, Plus, Edit, Trash2, X, Sparkles } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, X } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -215,7 +215,6 @@ const AdminCategoriesPage: React.FC = () => {
           </div>
         ) : filteredCategories.length === 0 ? (
           <div className="text-center py-16 px-6">
-            <Sparkles className="h-12 w-12 mx-auto mb-3 text-slate-600" />
             <p className="text-lg font-semibold text-slate-400 mb-1">No categories found</p>
             <p className="text-sm text-slate-500">
               {searchQuery ? 'Try adjusting your search' : 'Create your first category to get started'}
@@ -229,24 +228,19 @@ const AdminCategoriesPage: React.FC = () => {
                 className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:bg-white/[0.05] hover:border-amber-400/30 hover:-translate-y-1 hover:shadow-xl"
               >
                 {/* Category Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400/20 to-amber-500/20 border border-amber-400/30 flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 text-amber-400" />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openEditModal(category)}
-                      className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center transition-all duration-300 hover:bg-blue-500/20 hover:border-blue-500/30 hover:text-blue-400"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal(category)}
-                      className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                <div className="flex gap-2 justify-end mb-4">
+                  <button
+                    onClick={() => openEditModal(category)}
+                    className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center transition-all duration-300 hover:bg-blue-500/20 hover:border-blue-500/30 hover:text-blue-400"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => openDeleteModal(category)}
+                    className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
 
                 {/* Category Info */}

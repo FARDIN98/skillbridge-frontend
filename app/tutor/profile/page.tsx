@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../src/components/DashboardLayout';
 import api from '../../../src/lib/api';
-import { Save, AlertCircle, CheckCircle, DollarSign, Award, Plus, X } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle, Award, Plus, X } from 'lucide-react';
 
 interface TutorProfileData {
   bio: string;
@@ -475,17 +475,17 @@ const TutorProfilePage: React.FC = () => {
               {/* Hourly Rate */}
               <div className="form-group">
                 <label htmlFor="hourlyRate" className="form-label">
-                  Hourly Rate (USD) *
+                  Hourly Rate (BDT) *
                 </label>
-                <div className="input-prefix">
-                  <DollarSign className="input-prefix-icon" size={18} />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">৳</span>
                   <input
                     type="number"
                     id="hourlyRate"
                     name="hourlyRate"
                     value={profileData.hourlyRate || ''}
                     onChange={handleChange}
-                    className={`form-input ${errors.hourlyRate ? 'input-error' : ''}`}
+                    className={`form-input pl-8 ${errors.hourlyRate ? 'input-error' : ''}`}
                     placeholder="50"
                     min="1"
                     max="500"

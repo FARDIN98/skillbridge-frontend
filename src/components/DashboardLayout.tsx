@@ -14,9 +14,10 @@ import {
   Menu,
   X,
   BookOpen,
-  Sparkles,
   Clock,
-  GraduationCap
+  GraduationCap,
+  Layers,
+  Users
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -104,9 +105,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     if (user.role === 'ADMIN') {
       return [
         { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/admin/users', label: 'Users', icon: User },
+        { href: '/admin/users', label: 'Users', icon: Users },
         { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
-        { href: '/admin/categories', label: 'Categories', icon: Sparkles },
+        { href: '/admin/categories', label: 'Categories', icon: Layers },
       ];
     }
     return [];
@@ -213,10 +214,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             href="/"
             className={`flex items-center gap-3 mb-8 ${colors.text} focus:outline-none ${colors.ring} focus:ring-2 rounded-lg px-2`}
           >
-            <div className="relative">
-              <BookOpen className="h-8 w-8" />
-              <Sparkles className="h-3 w-3 absolute -top-1 -right-1" />
-            </div>
+            <BookOpen className="h-8 w-8" />
             <span className="text-2xl font-bold">SkillBridge</span>
           </Link>
 
@@ -277,10 +275,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             href="/"
             className={`flex items-center gap-3 mb-8 ${colors.text} focus:outline-none ${colors.ring} focus:ring-2 rounded-lg px-2`}
           >
-            <div className="relative">
-              <BookOpen className="h-8 w-8" />
-              <Sparkles className="h-3 w-3 absolute -top-1 -right-1" />
-            </div>
+            <BookOpen className="h-8 w-8" />
             <span className="text-2xl font-bold">SkillBridge</span>
           </Link>
 

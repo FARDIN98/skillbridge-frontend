@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calendar, Clock, DollarSign, X, Star } from 'lucide-react';
+import { Calendar, Clock, X, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../contexts/ToastContext';
 
@@ -146,8 +146,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
             </div>
             {totalPrice > 0 && (
               <div className="flex items-center gap-2 text-slate-300 text-sm">
-                <DollarSign className="h-4 w-4 text-amber-400 shrink-0" />
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>৳{totalPrice.toFixed(2)}</span>
               </div>
             )}
           </div>

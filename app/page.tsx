@@ -247,7 +247,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between pt-4 border-t border-slate-700">
                       <div>
                         <span className="text-2xl font-bold text-amber-400">
-                          ${tutor.hourlyRate || 0}
+                          ৳{tutor.hourlyRate || 0}
                         </span>
                         <span className="text-slate-400 text-sm">/hour</span>
                       </div>
@@ -317,7 +317,6 @@ export default function HomePage() {
                     <div className="bg-gradient-to-br from-amber-400/20 to-amber-400/10 border-2 border-amber-400/30 text-amber-400 font-bold backdrop-blur-xl h-20 w-20 rounded-full flex items-center justify-center text-3xl">
                       {step.number}
                     </div>
-                    <div className="absolute inset-0 rounded-full bg-amber-400 opacity-20 blur-xl animate-pulse" />
                   </div>
                   <step.icon className="h-12 w-12 text-amber-400 mx-auto mb-4" />
                   <h3 className="text-white text-2xl font-bold mb-3">{step.title}</h3>
@@ -413,7 +412,6 @@ export default function HomePage() {
             <div className={`bg-white/3 backdrop-blur-2xl border border-white/10 rounded-3xl transition-all duration-700 hover:bg-white/5 hover:border-amber-400/30 p-12 md:p-16 ${
               ctaSection.isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
             }`}>
-              <Sparkles className="h-16 w-16 text-amber-400 mx-auto mb-6" />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
                 Ready to Start Learning?
               </h2>

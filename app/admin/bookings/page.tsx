@@ -6,7 +6,7 @@ import api from '../../../src/lib/api';
 import { useToast } from '../../../src/contexts/ToastContext';
 import { getErrorMessage, logError } from '../../../src/lib/errors';
 import { TableRowSkeleton } from '../../../src/components/Skeleton';
-import { Search, Filter, Calendar, Clock, DollarSign, User, X } from 'lucide-react';
+import { Search, Filter, Calendar, Clock, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Booking {
@@ -24,7 +24,9 @@ interface Booking {
     id: string;
     name: string;
     email: string;
-    hourlyRate?: number;
+    tutorProfile?: {
+      hourlyRate: number;
+    };
   };
   review?: {
     id: string;
@@ -97,8 +99,8 @@ const AdminBookingsPage: React.FC = () => {
   }, [searchQuery, statusFilter, bookings]);
 
   const calculatePrice = (booking: Booking): number => {
-    if (!booking.tutor.hourlyRate) return 0;
-    return (booking.tutor.hourlyRate * booking.duration) / 60;
+    if (!booking.tutor.tutorProfile?.hourlyRate) return 0;
+    return (booking.tutor.tutorProfile.hourlyRate * booking.duration) / 60;
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -239,9 +241,8 @@ const AdminBookingsPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <p className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        {calculatePrice(booking).toFixed(2)}
+                      <p className="text-emerald-400 font-semibold text-sm">
+                        ৳{calculatePrice(booking).toFixed(2)}
                       </p>
                     </div>
 
@@ -303,9 +304,8 @@ const AdminBookingsPage: React.FC = () => {
 
                     <div>
                       <span className="block font-semibold text-xs uppercase tracking-wide text-slate-500 mb-1">Price</span>
-                      <p className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        {calculatePrice(booking).toFixed(2)}
+                      <p className="text-emerald-400 font-semibold text-sm">
+                        ৳{calculatePrice(booking).toFixed(2)}
                       </p>
                     </div>
 
@@ -368,10 +368,10 @@ const AdminBookingsPage: React.FC = () => {
                   <span className="text-slate-500 text-[13px] min-w-[100px]">Email</span>
                   <span className="text-slate-100 text-sm font-medium">{selectedBooking.tutor.email}</span>
                 </div>
-                {selectedBooking.tutor.hourlyRate && (
+                {selectedBooking.tutor.tutorProfile?.hourlyRate && (
                   <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
                     <span className="text-slate-500 text-[13px] min-w-[100px]">Hourly Rate</span>
-                    <span className="text-slate-100 text-sm font-medium">${selectedBooking.tutor.hourlyRate}/hr</span>
+                    <span className="text-slate-100 text-sm font-medium">৳{selectedBooking.tutor.tutorProfile.hourlyRate}/hr</span>
                   </div>
                 )}
               </div>
@@ -404,7 +404,7 @@ const AdminBookingsPage: React.FC = () => {
                 <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">
                   <span className="text-slate-500 text-[13px] min-w-[100px]">Total Price</span>
                   <span className="text-emerald-400 font-semibold text-sm">
-                    ${calculatePrice(selectedBooking).toFixed(2)}
+                    ৳{calculatePrice(selectedBooking).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0 last:pb-0">

@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Star,
   BookOpen,
-  DollarSign,
   Clock,
   Calendar,
   Award,
@@ -392,8 +391,7 @@ const TutorProfilePage = () => {
             >
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 text-emerald-400 mb-2">
-                  <DollarSign className="h-8 w-8" />
-                  <span className="text-4xl font-bold">{tutor.hourlyRate}</span>
+                  <span className="text-4xl font-bold">৳{tutor.hourlyRate}</span>
                   <span className="text-slate-400 text-lg">/hour</span>
                 </div>
               </div>
