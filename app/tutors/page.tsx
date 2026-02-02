@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -51,7 +51,7 @@ interface Category {
 
 type SortOption = 'rating-desc' | 'price-asc' | 'price-desc' | 'newest';
 
-const TutorsPage = () => {
+const TutorsPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
@@ -476,6 +476,24 @@ const TutorsPage = () => {
 
       <Footer />
     </div>
+  );
+};
+
+const TutorsPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <Navbar />
+        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <LoadingSpinner />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <TutorsPageContent />
+    </Suspense>
   );
 };
 
