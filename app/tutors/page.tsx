@@ -83,10 +83,10 @@ const TutorsPageContent = () => {
 
         // Ensure we always set arrays
         const tutorsData = tutorsRes.data.tutors || tutorsRes.data.data || tutorsRes.data || [];
-        const categoriesData = categoriesRes.data.data || categoriesRes.data || [];
+        const categoriesData = categoriesRes.data.categories || [];
 
         setTutors(Array.isArray(tutorsData) ? tutorsData : []);
-        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        setCategories(categoriesData);
       } catch (err: any) {
         console.error('Error fetching data:', err);
         setError(err.message || 'Failed to load tutors. Please try again.');

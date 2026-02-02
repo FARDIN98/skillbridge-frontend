@@ -10,6 +10,14 @@ interface TutorProfileData {
   hourlyRate: number;
   subjects: string[];
   experience: number;
+  categories: string[];
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
 }
 
 const TutorProfilePage: React.FC = () => {
@@ -17,36 +25,46 @@ const TutorProfilePage: React.FC = () => {
     bio: '',
     hourlyRate: 0,
     subjects: [],
-    experience: 0
+    experience: 0,
+    categories: []
   });
   const [newSubject, setNewSubject] = useState('');
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get('/tutors/profile');
-        const profile = response.data.tutorProfile || response.data;
+        const [profileResponse, categoriesResponse] = await Promise.all([
+          api.get('/tutors/profile'),
+          api.get('/categories')
+        ]);
+
+        const profile = profileResponse.data.tutorProfile || profileResponse.data;
+        const categoriesData = categoriesResponse.data.categories || [];
 
         if (profile) {
           setProfileData({
             bio: profile.bio || '',
             hourlyRate: profile.hourlyRate || 0,
             subjects: profile.subjects || [],
-            experience: profile.experience || 0
+            experience: profile.experience || 0,
+            categories: profile.categories?.map((cat: any) => cat.id) || []
           });
         }
+
+        setAvailableCategories(categoriesData);
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, []);
 
   const validateForm = (): boolean => {
@@ -72,8 +90,21 @@ const TutorProfilePage: React.FC = () => {
       newErrors.experience = 'Experience cannot be negative';
     }
 
+    if (profileData.categories.length === 0) {
+      newErrors.categories = 'Please select at least one category';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setProfileData((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(categoryId)
+        ? prev.categories.filter((id) => id !== categoryId)
+        : [...prev.categories, categoryId]
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -543,6 +574,38 @@ const TutorProfilePage: React.FC = () => {
                   <div className="error-text">
                     <AlertCircle size={14} />
                     {errors.subjects}
+                  </div>
+                )}
+              </div>
+
+              {/* Categories */}
+              <div className="form-group">
+                <label className="form-label">
+                  Teaching Categories *
+                </label>
+                <p className="text-slate-400 text-sm mb-3">
+                  Select the categories that best describe your expertise
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {availableCategories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => toggleCategory(category.id)}
+                      className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 border ${
+                        profileData.categories.includes(category.id)
+                          ? 'bg-amber-400/20 border-amber-400/30 text-amber-400'
+                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/8 hover:border-white/20'
+                      }`}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
+                {errors.categories && (
+                  <div className="error-text">
+                    <AlertCircle size={14} />
+                    {errors.categories}
                   </div>
                 )}
               </div>
